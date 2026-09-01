@@ -8,7 +8,8 @@ Mes cours en markdown — support d'apprentissage et de révision, construits au
 
 | Cours | Statut | Points clés |
 |---|---|---|
-| [Git — Le cours complet](git/cours-git.md) | ✅ À jour (sept. 2026) | 24 parties |
+| [Git — Le cours complet](git/cours-git.md) | ✅ À jour (sept. 2026) | 24 parties · 14 schémas Mermaid · quiz par section · 5 exercices scriptés · signature GPG/SSH · workflows |
+| [Réseaux — Le cours complet](reseaux/cours-reseaux.md) | ✅ À jour (sept. 2026) | 24 parties · 20+ schémas · fil rouge : le lab réel · subnetting · routage · TCP/DNS/NAT · IPv6 · sécurité · méthode de dépannage |
 
 ### 🛠️ Exercices pratiques
 
@@ -21,7 +22,6 @@ cd exercices && bash setup-exo-2.sh
 ## 🗺️ Feuille de route
 
 - [ ] Linux
-- [ ] Réseaux
 - [ ] Docker
 - [ ] Ansible
 - [ ] GIT
