@@ -42,10 +42,9 @@
 - [x] [18. Les workflows d'équipe](#18-les-workflows-déquipe)
 - [x] [19. Outils d'investigation : bisect, blame, reflog](#19-outils-dinvestigation--bisect-blame-reflog)
 - [x] [20. Bonnes pratiques et pièges classiques](#20-bonnes-pratiques-et-pièges-classiques)
-- [x] [21. Git au quotidien : mon lab DevOps](#21-git-au-quotidien--mon-lab-devops)
-- [x] [22. Aide-mémoire (cheat sheet)](#22-aide-mémoire-cheat-sheet)
-- [x] [23. Exercices et scénarios corrigés](#23-exercices-et-scénarios-corrigés)
-- [x] [24. Glossaire](#24-glossaire)
+- [x] [21. Aide-mémoire (cheat sheet)](#22-aide-mémoire-cheat-sheet)
+- [x] [22. Exercices et scénarios corrigés](#23-exercices-et-scénarios-corrigés)
+- [x] [23. Glossaire](#24-glossaire)
 
 ---
 
@@ -1178,57 +1177,6 @@ git push --force              # ☢️ écrase tout, sans condition
 
 > [!IMPORTANT]
 > `--force-with-lease` est le seul `--force` acceptable en équipe.
-
----
-
-## 21. Git au quotidien : mon lab DevOps
-
-Cette partie ancre le cours dans un cas concret : le [lab DevOps maison](https://github.com/efoures/labo-devops) — 5 VMs VirtualBox pilotées par Ansible, GitLab CE, monitoring. Comment Git y est utilisé *pour de vrai*.
-
-### 21.1 Un dépôt = la source de vérité
-
-Règle du lab : **rien ne se fait à la main sur les VMs**. Toute configuration (playbooks, inventaires, fichiers de service) vit dans `labo-devops` — Git devient la référence absolue de l'état de l'infrastructure, ce qu'on appelle une approche *Infrastructure as Code*.
-
-### 21.2 Organisation par branches et tags
-
-```mermaid
-gitGraph
-    commit id: "phase 0: VMs"
-    branch phase/1-durcissement
-    commit id: "playbook SSH"
-    commit id: "fail2ban"
-    checkout main
-    merge phase/1-durcissement tag: "v0.1.0"
-    branch phase/2-monitoring
-    commit id: "prometheus"
-    checkout main
-    merge phase/2-monitoring tag: "v0.2.0"
-```
-
-- **Une branche par phase** du plan (`phase/2-monitoring`), fusionnée dans `main` une fois **validée sur les VMs** (règle du lab : une brique validée avant la suivante).
-- **Un tag annoté par jalon** (`v0.1.0` = infrastructure durcie, `v0.2.0` = monitoring en place). En cas de régression, `git diff v0.1.0 v0.2.0` isole immédiatement ce qui a changé.
-- Plus tard, GitLab CE du lab prendra le relais de GitHub : mêmes réflexes, serveur auto-hébergé (exercice de migration `git remote set-url`…).
-
-### 21.3 Les secrets : le casse-tête résolu proprement
-
-Les playbooks contiennent des mots de passe (Vault Ansible, tokens). Trois niveaux de réponse :
-
-1. **Jamais en clair** dans le dépôt — `ansible-vault` chiffre les variables sensibles, la passphrase vit hors de Git ;
-2. **`.gitignore` préventif** : `*.vaultpass`, `.env`, `*_rsa` dès le premier commit ;
-3. Un hook `pre-commit` anti-secrets (§15) en filet de sécurité.
-
-> [!WARNING]
-> Dans un lab, la tentation de « committer juste pour tester » un mot de passe en clair est forte. C'est exactement comme ça que des labs finissent publics avec des secrets dedans. Le réflexe pro se prend sur SON projet.
-
-### 21.4 Ce que le lab m'apporte comme réflexes Git
-
-| Réflexe | Outil vu dans le cours | Où c'est utile dans le lab |
-|---|---|---|
-| Une brique = une branche + un tag | §8, §13, §18 | Chaque phase du plan |
-| Tester avant de fusionner | PR + CI (§18) | GitLab CI quand la phase 3 sera en place |
-| Rejouer un état passé | tags + `checkout` | Reproduire un bug apparu entre deux jalons |
-| Traquer « qui a changé cette config » | `git blame` / `git log -p` (§19) | Une VM a changé de comportement : retrouver le playbook fautif |
-| Ne rien perdre | reflog (§19) | Manipulations agressives sur les branches de test |
 
 ---
 
