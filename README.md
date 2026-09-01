@@ -8,7 +8,7 @@ Mes cours DevOps / DevSecOps en markdown — support d'apprentissage et de révi
 
 | Cours | Statut | Points clés |
 |---|---|---|
-| [Git — Le cours complet](git/cours-git.md) | ✅ À jour (sept. 2026) | 24 parties · 14 schémas Mermaid · quiz par section · 5 exercices scriptés · signature GPG/SSH · workflows |
+| [Git — Le cours complet](git/cours-git.md) | ✅ À jour (sept. 2026) | 24 parties |
 
 ### 🛠️ Exercices pratiques
 
