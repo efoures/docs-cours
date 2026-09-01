@@ -2,7 +2,7 @@
 
 ![Cours](https://img.shields.io/badge/cours-DevOps-blue) ![Langue](https://img.shields.io/badge/langue-fran%C3%A7ais-green) ![Format](https://img.shields.io/badge/format-markdown_(Mermaid)-purple)
 
-Mes cours DevOps / DevSecOps en markdown — support d'apprentissage et de révision, construits au fil de mon parcours. Chaque cours est autoporteur : théorie, schémas, scénarios réels, pièges, quiz et exercices **avec scripts de mise en situation prêts à l'emploi**.
+Mes cours en markdown — support d'apprentissage et de révision, construits au fil de mon parcours. Chaque cours est autoporteur : théorie, schémas, scénarios réels, pièges, quiz et exercices **avec scripts de mise en situation prêts à l'emploi**.
 
 ## 🗂️ Index des cours
 
@@ -24,9 +24,9 @@ cd exercices && bash setup-exo-2.sh
 - [ ] Réseaux
 - [ ] Docker
 - [ ] Ansible
-- [ ] GitLab CI
+- [ ] GIT
 - [ ] ELK
-- [ ] DevSecOps
+- [ ] Terraform
 
 ## 📐 Conventions rédactionnelles
 
