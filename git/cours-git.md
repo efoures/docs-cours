@@ -1,35 +1,51 @@
 # Git — Le cours complet
 
+![Statut](https://img.shields.io/badge/cours-Git-blue) ![Mise à jour](https://img.shields.io/badge/mise_%C3%A0_jour-sept._2026-green) ![Niveau](https://img.shields.io/badge/niveau-d%C3%A9butant_%E2%86%92_avanc%C3%A9-orange) ![Format](https://img.shields.io/badge/sch%C3%A9mas-Mermaid-purple)
+
 > Cours à jour (Git 2.50+, branche par défaut `main`, commandes modernes `git switch` / `git restore`).
-> Dernière mise à jour : septembre 2026.
+> Exercices pratiques prêts à l'emploi : [dossier `exercices/`](../exercices/).
+
+---
+
+## 🧭 Parcours de lecture
+
+| Vous êtes… | Parcours | Parties | Durée estimée |
+|---|---|---|---|
+| 🌱 **Débutant** | Les bases indispensables | 1 → 9 | ≈ 2 h 30 |
+| 🌿 **Praticien** | Historique, retour arrière, outils pro | 10 → 19 | ≈ 2 h |
+| 🚀 **Confirmé** | Workflows, sécurité, conventions d'équipe | 20 → 24 | ≈ 1 h 30 |
+| 🔍 **Révision rapide** | Aide-mémoire + quiz | 22 + quiz | ≈ 20 min |
+
+💡 **Méthode conseillée** : lisez une partie, faites son quiz, puis reproduisez les commandes dans un dépôt jetable (`mkdir /tmp/essai && cd /tmp/essai && git init`). La pratique vaut trois relectures.
 
 ---
 
 ## Table des matières
 
-1. [Comprendre Git](#1-comprendre-git)
-2. [Installation et configuration](#2-installation-et-configuration)
-3. [Le modèle mental : les trois zones](#3-le-modèle-mental-les-trois-zones)
-4. [Démarrer un projet](#4-démarrer-un-projet)
-5. [Le cycle de base](#5-le-cycle-de-base)
-6. [Anatomie d'un commit](#6-anatomie-dun-commit)
-7. [Les dépôts distants (remotes)](#7-les-dépôts-distants-remotes)
-8. [Les branches](#8-les-branches)
-9. [Fusionner : merge](#9-fusionner--merge)
-10. [Rebase et cherry-pick](#10-rebase-et-cherry-pick)
-11. [Annuler : l'art du retour arrière](#11-annuler-lart-du-retour-arrière)
-12. [Stash et worktree](#12-stash-et-worktree)
-13. [Les tags et releases](#13-les-tags-et-releases)
-14. [Le fichier .gitignore](#14-le-fichier-gitignore)
-15. [Les hooks Git](#15-les-hooks-git)
-16. [Les submodules](#16-les-submodules)
-17. [Signer ses commits (SSH / GPG)](#17-signer-ses-commits-ssh--gpg)
-18. [Les workflows d'équipe](#18-les-workflows-déquipe)
-19. [Outils d'investigation : bisect, blame, reflog](#19-outils-dinvestigation--bisect-blame-reflog)
-20. [Bonnes pratiques et pièges classiques](#20-bonnes-pratiques-et-pièges-classiques)
-21. [Aide-mémoire (cheat sheet)](#21-aide-mémoire-cheat-sheet)
-22. [Exercices et scénarios corrigés](#22-exercices-et-scénarios-corrigés)
-23. [Glossaire](#23-glossaire)
+- [x] [1. Comprendre Git](#1-comprendre-git)
+- [x] [2. Installation et configuration](#2-installation-et-configuration)
+- [x] [3. Le modèle mental : les trois zones](#3-le-modèle-mental--les-trois-zones)
+- [x] [4. Démarrer un projet](#4-démarrer-un-projet)
+- [x] [5. Le cycle de base](#5-le-cycle-de-base)
+- [x] [6. Anatomie d'un commit](#6-anatomie-dun-commit)
+- [x] [7. Les dépôts distants (remotes)](#7-les-dépôts-distants-remotes)
+- [x] [8. Les branches](#8-les-branches)
+- [x] [9. Fusionner : merge](#9-fusionner--merge)
+- [x] [10. Rebase et cherry-pick](#10-rebase-et-cherry-pick)
+- [x] [11. Annuler : l'art du retour arrière](#11-annuler-lart-du-retour-arrière)
+- [x] [12. Stash et worktree](#12-stash-et-worktree)
+- [x] [13. Les tags et releases](#13-les-tags-et-releases)
+- [x] [14. Le fichier .gitignore](#14-le-fichier-gitignore)
+- [x] [15. Les hooks Git](#15-les-hooks-git)
+- [x] [16. Les submodules](#16-les-submodules)
+- [x] [17. Signer ses commits (SSH / GPG)](#17-signer-ses-commits-ssh--gpg)
+- [x] [18. Les workflows d'équipe](#18-les-workflows-déquipe)
+- [x] [19. Outils d'investigation : bisect, blame, reflog](#19-outils-dinvestigation--bisect-blame-reflog)
+- [x] [20. Bonnes pratiques et pièges classiques](#20-bonnes-pratiques-et-pièges-classiques)
+- [x] [21. Git au quotidien : mon lab DevOps](#21-git-au-quotidien--mon-lab-devops)
+- [x] [22. Aide-mémoire (cheat sheet)](#22-aide-mémoire-cheat-sheet)
+- [x] [23. Exercices et scénarios corrigés](#23-exercices-et-scénarios-corrigés)
+- [x] [24. Glossaire](#24-glossaire)
 
 ---
 
@@ -104,7 +120,22 @@ Conséquence pratique : tout dans Git est **quasi instantané** (brancher, commi
 
 Git identifie chaque objet par une **empreinte SHA-1** (SHA-256 est en cours de déploiement) calculée sur son contenu. Rien ne peut être altéré sans que Git ne s'en aperçoive : **l'historique est intègre par construction**.
 
-> 💡 C'est ce hash de 40 caractères qu'on abrège en `a1b2c3d` dans les commandes.
+> [!TIP]
+> C'est ce hash de 40 caractères qu'on abrège en `a1b2c3d` dans les commandes.
+
+### 🎯 Quiz — Comprendre Git
+
+1. Que possède chaque développeur dans un DVCS que n'a pas un utilisateur de SVN ?
+2. Git stocke-t-il les différences entre les versions ?
+3. « Je travaille hors ligne, impossible de committer » — vrai ou faux ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. **L'intégralité de l'historique** du projet (et pas seulement une copie des fichiers).
+2. Non — il stocke des **snapshots** (instantanés complets) ; les fichiers inchangés sont de simples liens.
+3. **Faux** : commit, branches et historique sont 100 % locaux. Seuls `push`/`pull` demandent le réseau.
+</details>
 
 ---
 
@@ -134,7 +165,8 @@ git config --global user.email "vous@exemple.com"
 git config --global init.defaultBranch main
 ```
 
-> ⚠️ **Piège classique** : l'email doit **correspondre à un email vérifié de votre compte GitHub/GitLab**, sinon vos commits ne seront pas rattachés à votre profil (et la signature GPG n'affichera pas « Verified »).
+> [!WARNING]
+> L'email doit **correspondre à un email vérifié de votre compte GitHub/GitLab**, sinon vos commits ne seront pas rattachés à votre profil (et la signature GPG n'affichera pas « Verified »). Une lettre de différence (`efoure1@` vs `efoures1@`) suffit à tout casser — voir §17.4.
 
 ### 2.3 Configuration recommandée
 
@@ -157,7 +189,20 @@ Consulter sa configuration :
 git config --global --list
 ```
 
-> 💡 **Niveaux de configuration** : `--system` (toute la machine) > `--global` (votre utilisateur) > local (un dépôt, fichier `.git/config`). Le plus spécifique gagne.
+> [!NOTE]
+> **Niveaux de configuration** : `--system` (toute la machine) > `--global` (votre utilisateur) > local (un dépôt, fichier `.git/config`). Le plus spécifique gagne.
+
+### 🎯 Quiz — Configuration
+
+1. Quelle commande donne un historique graphique compact avec l'alias vu ci-dessus ?
+2. Votre commit apparaît avec le mauvais email — quel fichier/config corriger ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. `git lg` (défini par `alias.lg = log --oneline --graph --decorate --all`).
+2. `git config --global user.email "bon-email@exemple.com"` — et pensez à vérifier que cet email est **vérifié** sur la plateforme. Les commits déjà créés gardent l'ancien email (ils ne sont pas réécrits).
+</details>
 
 ---
 
@@ -167,10 +212,10 @@ git config --global --list
 
 ```mermaid
 flowchart LR
-    WD["📁 Répertoire de travail<br/>(Working Directory)"]
-    ST["📋 Zone de staging<br/>(Index)"]
-    LR["🗄️ Dépôt local<br/>(.git)"]
-    RR["☁️ Dépôt distant<br/>(Remote)"]
+    WD["📁 Répertoire de travail<br/>(Working Directory)"]:::work
+    ST["📋 Zone de staging<br/>(Index)"]:::stage
+    LR["🗄️ Dépôt local<br/>(.git)"]:::repo
+    RR["☁️ Dépôt distant<br/>(Remote)"]:::remote
 
     WD -->|"git add"| ST
     ST -->|"git commit"| LR
@@ -178,6 +223,11 @@ flowchart LR
     RR -->|"git fetch / pull"| LR
     LR -->|"git checkout / restore"| WD
     ST -->|"git restore --staged"| WD
+
+    classDef work fill:#1f6feb,stroke:#388bfd,color:#fff
+    classDef stage fill:#9e6a03,stroke:#d29922,color:#fff
+    classDef repo fill:#1a7f37,stroke:#2ea043,color:#fff
+    classDef remote fill:#8250df,stroke:#a371f7,color:#fff
 ```
 
 | Zone | Rôle | Question à se poser |
@@ -191,7 +241,40 @@ flowchart LR
 
 C'est une **préparation du commit**, fichier par fichier, voire ligne par ligne (`git add -p`). Elle permet de construire des commits **propres et cohérents** : on ne commite pas « tout le bazar » d'un coup, mais des unités logiques.
 
-> 🔑 **Règle d'or** : un commit = une intention. « Corriger le bug d'authentification », pas « plein de trucs ».
+> [!IMPORTANT]
+> **Règle d'or** : un commit = une intention. « Corriger le bug d'authentification », pas « plein de trucs ».
+
+### À quoi ressemble le quotidien, en vrai ?
+
+```
+$ git status -sb
+## main...origin/main [ahead 1]
+ M app.js
+M  index.html
+?? notes.txt
+
+$ git add -p app.js          # validation hunk par hunk (y/n/q)
+$ git commit -m "feat: ajout du formulaire de contact"
+$ git lg
+* f1c54a4 (HEAD -> main) feat: ajout du formulaire de contact
+* 596dd4a (origin/main) docs: README initial
+```
+
+### 🎯 Quiz — Les trois zones
+
+1. `git add fichier` déplace le fichier de la zone ___ vers la zone ___.
+2. `git commit` déplace le contenu de la zone ___ vers le ___.
+3. Quelle commande montre ce qui sera réellement committé ?
+4. Un fichier apparaît en `??` dans `git status` : que signifie-t-il ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. Du **répertoire de travail** vers la **zone de staging**.
+2. De la **zone de staging** vers le **dépôt local** (`.git`).
+3. `git diff --staged` (diff staging ↔ dernier commit).
+4. Fichier **untracked** : nouveau, jamais commité, que Git ne suit pas encore.
+</details>
 
 ---
 
@@ -222,7 +305,8 @@ Un dossier caché **`.git/`** contenant toute la mécanique (objets, référence
 └── hooks/        → scripts automatisables
 ```
 
-> ⚠️ **Piège** : supprimer le dossier `.git/` détruit tout l'historique. Le répertoire de travail, lui, reste intact.
+> [!WARNING]
+> Supprimer le dossier `.git/` détruit tout l'historique. Le répertoire de travail, lui, reste intact.
 
 ### 4.3 HTTPS ou SSH ?
 
@@ -282,7 +366,8 @@ Untracked files:                  # nouveau fichier que Git ignore totalement
         notes.txt
 ```
 
-> 💡 `git status -sb` donne une version compacte avec la branche et l'avance/retard sur le remote.
+> [!TIP]
+> `git status -sb` donne une version compacte avec la branche et l'avance/retard sur le remote.
 
 ### 5.4 Comparer : `git diff`
 
@@ -293,7 +378,8 @@ git diff main..feature    # entre deux branches
 git diff a1b2c3d~1 a1b2c3d  # ce qu'a changé un commit précis
 ```
 
-> ⚠️ **Piège** : `git diff` seul ne montre **pas** ce qui est déjà stagé. Pensez à `git diff --staged` avant de committer.
+> [!WARNING]
+> `git diff` seul ne montre **pas** ce qui est déjà stagé. Pensez à `git diff --staged` avant de committer.
 
 ### 5.5 Lire l'historique
 
@@ -313,7 +399,22 @@ git log -p fichier.txt           # avec les diffs
 * 596dd4a Initial commit: README
 ```
 
-> 💡 Avec l'alias `git lg` (section 2.3), l'historique devient un outil de lecture quotidien.
+> [!TIP]
+> Avec l'alias `git lg` (section 2.3), l'historique devient un outil de lecture quotidien.
+
+### 🎯 Quiz — Cycle de base
+
+1. Vous venez de `git add .` un peu vite et voulez retirer `secret.txt` du staging (sans perdre les modifs) ?
+2. Différence entre `git diff` et `git diff --staged` ?
+3. Que signifie `[ahead 1]` dans `git status -sb` ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. `git restore --staged secret.txt` — il redevient « modifié non stagé », aucune perte.
+2. `git diff` : travail ↔ staging. `git diff --staged` : staging ↔ dernier commit (donc « ce que je vais committer »).
+3. Votre branche locale a **1 commit de plus** que le remote — un `git push` l'enverra.
+</details>
 
 ---
 
@@ -360,7 +461,8 @@ Refs: #42
 
 **Exemples mauvais** : `fix`, `modifs`, `wip`, `ça marche`.
 
-> 🔑 **Règle** : le message décrit le **pourquoi**, le diff décrit déjà le **quoi**.
+> [!IMPORTANT]
+> **Règle** : le message décrit le **pourquoi**, le diff décrit déjà le **quoi**.
 
 ### 6.3 Modifier le dernier commit
 
@@ -373,7 +475,8 @@ git commit --amend --no-edit
 git commit --amend -m "fix: nouveau message"
 ```
 
-> ⚠️ **Piège majeur** : `--amend` **remplace** le commit par un nouveau (nouveau SHA). Si le commit a déjà été **poussé et partagé**, ne l'amendez pas — utilisez un nouveau commit correctif. (Voir §11 et §20.)
+> [!WARNING]
+> `--amend` **remplace** le commit par un nouveau (nouveau SHA). Si le commit a déjà été **poussé et partagé**, ne l'amendez pas — utilisez un nouveau commit correctif. (Voir §11 et §20.)
 
 ---
 
@@ -423,7 +526,20 @@ sequenceDiagram
     L->>R: git push → ✅
 ```
 
-> 💡 **Bonne habitude** : `git pull --rebase` garde un historique linéaire (pas de commits de fusion « Merge branch 'main' of… » en pagaille). Pour l'activer par défaut : `git config --global pull.rebase true`.
+> [!TIP]
+> **Bonne habitude** : `git pull --rebase` garde un historique linéaire (pas de commits de fusion « Merge branch 'main' of… » en pagaille). Pour l'activer par défaut : `git config --global pull.rebase true`.
+
+### 🎯 Quiz — Remotes
+
+1. `git fetch` et `git pull` : quelle différence fondamentale ?
+2. Un `git push` est refusé avec *non-fast-forward* : que s'est-il passé, que faire ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. `fetch` **rapporte** les commits distants sans toucher à votre branche ; `pull` = `fetch` + **intégration** (merge/rebase) immédiate.
+2. Le remote contient des commits que vous n'avez pas (un collègue a poussé). Faites `git pull --rebase` (ou `git pull` + résolution), puis re-poussez. Jamais de `--force` sans accord d'équipe.
+</details>
 
 ---
 
@@ -456,7 +572,8 @@ git branch -d feature/login    # supprimer (fusionnée uniquement)
 git branch -D feature/login    # forcer la suppression
 ```
 
-> 💡 Les commandes `git checkout -b` / `git checkout <branche>` sont l'ancienne syntaxe. `git switch` (branches) et `git restore` (fichiers) existent depuis Git 2.23 pour lever l'ambiguïté — préférez-les.
+> [!NOTE]
+> Les commandes `git checkout -b` / `git checkout <branche>` sont l'ancienne syntaxe. `git switch` (branches) et `git restore` (fichiers) existent depuis Git 2.23 pour lever l'ambiguïté — préférez-les.
 
 ### 8.2 Pourquoi brancher systématiquement ?
 
@@ -465,6 +582,20 @@ git branch -D feature/login    # forcer la suppression
 - on fusionne via **pull request / merge request** → relecture, CI, discussion.
 
 **Nommer ses branches** : `feature/login-sso`, `fix/jwt-expiry`, `hotfix/security-patch`. Préfixe + sujet court, sans espaces ni accents.
+
+### 🎯 Quiz — Branches
+
+1. Combien coûte la création d'une branche Git en ressources ? Pourquoi ?
+2. Que signifie « detached HEAD » et comment en sortir proprement ?
+3. Vous voulez garder un travail expérimental situé sur un commit orphelin (detached) ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. **Rien** : c'est l'écriture d'un fichier de 41 octets (le SHA du commit pointé). Pas de copie de fichiers.
+2. HEAD pointe directement sur un **commit** au lieu d'une branche : vos nouveaux commits ne sont rattachés à rien et seraient perdus. Sortie : `git switch -c nouvelle-branche` (pour les garder) ou `git switch main` (pour abandonner).
+3. `git switch -c sauvetage` depuis ce detached HEAD — cela crée une branche qui ancre les commits.
+</details>
 
 ---
 
@@ -525,7 +656,20 @@ prix = 120  # l'autre version (feature)
 4. `git commit` → Git propose le message du commit de fusion.
 5. (`git merge --abort` pour tout annuler proprement.)
 
-> 💡 **Réflexe anti-stress** : un conflit n'est **jamais** une perte de données. Vos deux versions existent toujours, dans les deux commits parents.
+> [!IMPORTANT]
+> **Réflexe anti-stress** : un conflit n'est **jamais** une perte de données. Vos deux versions existent toujours, dans les deux commits parents.
+
+### 🎯 Quiz — Merge
+
+1. Quelle est la différence structurelle entre un fast-forward et un three-way merge ?
+2. Pendant un conflit, que signifie `<<<<<<< HEAD` … `>>>>>>> feature` ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. Le fast-forward **n'crée pas de commit** (simple avancée du pointeur, possible car pas de divergence). Le three-way crée un **commit à deux parents**.
+2. Le bloc entre les marqueurs contient vos deux versions du conflit : `HEAD` = votre branche courante, le bas = la branche fusionnée. Vous éditez pour produire la version finale, puis `git add`.
+</details>
 
 ---
 
@@ -562,10 +706,9 @@ git rebase --abort     # annuler, retour à l'état d'avant
 
 ### 10.2 La règle d'or du rebase
 
-> 🔑 **Ne jamais rebaser une branche déjà poussée et partagée.**
+> [!IMPORTANT]
+> **Ne jamais rebaser une branche déjà poussée et partagée.**
 > Rebasez **vos** branches locales / vos PR pas encore validées. `main` partagé, on ne le réécrit jamais.
-
-*Gold rule (Git rebase) : ne rebase jamais une branche publique.*
 
 ### 10.3 Rebase interactif : sculpter son historique
 
@@ -595,6 +738,20 @@ git cherry-pick a1b2c3d     # copier CE commit sur la branche courante
 
 Scénario classique : corriger un bug sur `main`, puis **porter le correctif** sur la branche de maintenance.
 
+### 🎯 Quiz — Rebase
+
+1. Après un rebase, les SHA de vos commits changent. Quelle en est la conséquence sur les branches déjà publiées ?
+2. `squash` vs `fixup` : différence ?
+3. Vous avez rebasé `feature/x` poussée, le push est refusé : quelle commande de push propre, et pourquoi pas `--force` ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. Vos commits locaux et ceux du remote sont devenus **deux historiques différents** : d'où la règle d'or (ne pas rebaser du partagé) et l'usage de `--force-with-lease` si c'était assumé.
+2. Les deux **fusionnent** le commit dans le précédent ; `squash` combine les **messages** (édition), `fixup` **jette** le message du commit absorbé.
+3. `git push --force-with-lease` : écrase **sauf** si quelqu'un a poussé entre-temps. `--force` écrase sans condition et peut détruire le travail d'un collègue.
+</details>
+
 ---
 
 ## 11. Annuler : l'art du retour arrière
@@ -619,7 +776,8 @@ flowchart LR
     R --> H["--hard<br/>HEAD + staging + fichiers<br/>⚠️ EFFACE les modifications"]
 ```
 
-> 🔑 **Mémo** : soft = « je re-commiterai autrement », mixed = « je re-stagerai autrement », hard = « je brûle tout » — et `--hard` ne touche **pas** aux fichiers non suivis ni au stash.
+> [!IMPORTANT]
+> **Mémo** : soft = « je re-commiterai autrement », mixed = « je re-stagerai autrement », hard = « je brûle tout » — et `--hard` ne touche **pas** aux fichiers non suivis ni au stash.
 
 ### 11.3 `revert` : annuler sans réécrire l'histoire
 
@@ -643,7 +801,22 @@ git reflog
 git reset --hard f9e8d7c    # ressusciter le commit
 ```
 
-Tant que le commit n'a pas été collecté par le garbage collector (~30 jours par défaut pour les commits inaccessibles), il est récupérable.
+> [!TIP]
+> Tant que le commit n'a pas été collecté par le garbage collector (~30 jours par défaut pour les commits inaccessibles), il est récupérable.
+
+### 🎯 Quiz — Annuler
+
+1. Un commit **poussé** contient un secret : `reset` ou `revert` ? Pourquoi ?
+2. Quelle différence entre `reset --soft HEAD~1` et `restore --staged .` ?
+3. `reset --hard HEAD~1` : que perd-on exactement ? Que reste-t-il ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. **`revert`** : il ajoute un commit d'annulation sans réécrire l'histoire (compatible avec tous les clones). (Et le secret étant désormais **dans l'historique**, il faut quand même le rotationner — voir §14.2.)
+2. `reset --soft` **supprime le commit** et remet tout en staging ; `restore --staged` ne touche pas aux commits, il **dé-stage** seulement des fichiers.
+3. On perd le commit dans la branche courante + ses modifications dans les fichiers. **Mais** le commit reste accessible via `reflog` (~30 jours) : presque tout est récupérable.
+</details>
 
 ---
 
@@ -668,7 +841,8 @@ flowchart LR
     S -->|"git stash pop"| WD
 ```
 
-> ⚠️ **Piège** : un stash n'est pas un commit. Les stashs oubliés finissent perdus. Si le travail doit survivre à la journée → commettez sur une branche, même en `wip`.
+> [!WARNING]
+> Un stash n'est pas un commit. Les stashs oubliés finissent perdus. Si le travail doit survivre à la journée → commettez sur une branche, même en `wip`.
 
 ### 12.2 Worktree : plusieurs dossiers, un seul dépôt
 
@@ -701,7 +875,8 @@ git push origin :refs/tags/v1.0.0   # supprimer sur le remote
 | Simple pointeur | Vrai objet : message, auteur, date, **signature GPG possible** |
 | Pour le jetable | **Pour toute release** ⭐ |
 
-> 💡 Sur GitHub, pousser un tag `v1.2.3` déclenche la proposition de créer une **Release** (notes de version + archive téléchargeable). Le versionnage suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`.
+> [!TIP]
+> Sur GitHub, pousser un tag `v1.2.3` déclenche la proposition de créer une **Release** (notes de version + archive téléchargeable). Le versionnage suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`.
 
 ---
 
@@ -731,7 +906,8 @@ debug?.log           # ? = un caractère
 - Modèles prêts à l'emploi : [github.com/github/gitignore](https://github.com/github/gitignore).
 - Un `.gitignore` peut exister par sous-dossier (il s'applique à son arborescence).
 
-> ⚠️ **Piège de sécurité** : jamais de `.env`, clés privées, tokens dans un dépôt — même privé, même « temporairement ». Une clé poussée est une clé compromise (rotation obligatoire).
+> [!WARNING]
+> **Piège de sécurité** : jamais de `.env`, clés privées, tokens dans un dépôt — même privé, même « temporairement ». Une clé poussée est une clé **compromise** : rotation obligatoire, et elle reste dans l'historique même après suppression !
 
 ### 14.3 Les niveaux d'exclusion
 
@@ -763,7 +939,8 @@ if git diff --cached | grep -E "(PASSWORD|API_KEY|SECRET)="; then
 fi
 ```
 
-> ⚠️ Les hooks ne sont **pas** versionnés avec le dépôt (ils vivent dans `.git/`). Pour les partager : gestionnaire de hooks comme **pre-commit** (Python) ou **husky** (Node), qui les synchronise depuis un fichier commité.
+> [!NOTE]
+> Les hooks ne sont **pas** versionnés avec le dépôt (ils vivent dans `.git/`). Pour les partager : gestionnaire de hooks comme **pre-commit** (Python) ou **husky** (Node), qui les synchronise depuis un fichier commité.
 
 ---
 
@@ -831,7 +1008,8 @@ Puis déclarer la clé publique comme *Signing key* dans *GitHub → Settings �
 2. La **clé publique** (avec le bon uid) est enregistrée sur votre compte ;
 3. Le commit est **signé** avec la clé privée correspondante.
 
-> 💡 **Retour d'expérience réel** : une lettre de différence dans l'email (`efoure1` vs `efoures1`) ou une clé mise à jour après ajout des uid suffisent à rétrograder en « Unverified ». En cas de doute, `git log --show-signature` vérifie localement que la signature est bonne.
+> [!WARNING]
+> **Retour d'expérience réel** : une lettre de différence dans l'email (`efoure1` vs `efoures1`) ou une clé mise à jour après ajout des uid suffisent à rétrograder en « Unverified ». En cas de doute, `git log --show-signature` vérifie localement que la signature est bonne — si elle est bonne mais que GitHub refuse, le problème est côté **uid de la clé ou email du compte**, pas côté signature.
 
 ---
 
@@ -894,6 +1072,18 @@ Tout le monde commite sur `main` (ou des branches de vie **très courte**, < 1-2
 | Logiciel versionné, support multi-versions | GitFlow |
 | Équipe mature, déploiements multiples/jour | Trunk-Based |
 
+### 🎯 Quiz — Workflows
+
+1. Dans GitHub Flow, quelle propriété doit toujours vérifier `main` ?
+2. Pourquoi GitFlow est-il souvent jugé trop lourd pour du web ?
+
+<details>
+<summary>✅ Réponses</summary>
+
+1. Être **toujours déployable** : chaque merge sur `main` peut partir en production.
+2. Ses branches permanentes `main` + `develop` et ses releases formelles ralentissent la boucle feedback→prod, alors que le déploiement continu demande des fusions fréquentes et directes (GitHub Flow / trunk-based).
+</details>
+
 ---
 
 ## 19. Outils d'investigation : bisect, blame, reflog
@@ -912,7 +1102,8 @@ git bisect bad                  # ou git bisect good
 git bisect reset                # revenir à la réalité
 ```
 
-> 💡 Automatisable : `git bisect run ./test.sh` rejoue le script sur chaque commit.
+> [!TIP]
+> Automatisable : `git bisect run ./test.sh` rejoue le script sur chaque commit.
 
 ### 19.2 `git blame` : qui a écrit cette ligne ?
 
@@ -922,7 +1113,8 @@ git blame -L 10,20 fichier.txt   # seulement les lignes 10 à 20
 git blame -w fichier.txt         # en ignorant les changements d'espaces
 ```
 
-> ⚠️ À utiliser pour **comprendre**, pas pour accuser. Un `blame` qui désigne quelqu'un révèle souvent un refactoring mécanique, pas une faute.
+> [!IMPORTANT]
+> À utiliser pour **comprendre**, pas pour accuser. Un `blame` qui désigne quelqu'un révèle souvent un refactoring mécanique, pas une faute.
 
 ### 19.3 `git reflog` : la boîte noire
 
@@ -937,7 +1129,8 @@ git reflog
 git reset --hard HEAD@{1}       # remonter le temps
 ```
 
-**C'est votre assurance-vie** : reset --hard, rebase raté, branche supprimée… presque tout se récupère via le reflog.
+> [!IMPORTANT]
+> **C'est votre assurance-vie** : reset --hard, rebase raté, branche supprimée… presque tout se récupère via le reflog.
 
 ### 19.4 Fouiller dans l'historique
 
@@ -983,11 +1176,63 @@ git push --force-with-lease   # ⭐ écrase SAUF si quelqu'un a poussé entre-te
 git push --force              # ☢️ écrase tout, sans condition
 ```
 
-`--force-with-lease` est le seul `--force` acceptable en équipe.
+> [!IMPORTANT]
+> `--force-with-lease` est le seul `--force` acceptable en équipe.
 
 ---
 
-## 21. Aide-mémoire (cheat sheet)
+## 21. Git au quotidien : mon lab DevOps
+
+Cette partie ancre le cours dans un cas concret : le [lab DevOps maison](https://github.com/efoures/labo-devops) — 5 VMs VirtualBox pilotées par Ansible, GitLab CE, monitoring. Comment Git y est utilisé *pour de vrai*.
+
+### 21.1 Un dépôt = la source de vérité
+
+Règle du lab : **rien ne se fait à la main sur les VMs**. Toute configuration (playbooks, inventaires, fichiers de service) vit dans `labo-devops` — Git devient la référence absolue de l'état de l'infrastructure, ce qu'on appelle une approche *Infrastructure as Code*.
+
+### 21.2 Organisation par branches et tags
+
+```mermaid
+gitGraph
+    commit id: "phase 0: VMs"
+    branch phase/1-durcissement
+    commit id: "playbook SSH"
+    commit id: "fail2ban"
+    checkout main
+    merge phase/1-durcissement tag: "v0.1.0"
+    branch phase/2-monitoring
+    commit id: "prometheus"
+    checkout main
+    merge phase/2-monitoring tag: "v0.2.0"
+```
+
+- **Une branche par phase** du plan (`phase/2-monitoring`), fusionnée dans `main` une fois **validée sur les VMs** (règle du lab : une brique validée avant la suivante).
+- **Un tag annoté par jalon** (`v0.1.0` = infrastructure durcie, `v0.2.0` = monitoring en place). En cas de régression, `git diff v0.1.0 v0.2.0` isole immédiatement ce qui a changé.
+- Plus tard, GitLab CE du lab prendra le relais de GitHub : mêmes réflexes, serveur auto-hébergé (exercice de migration `git remote set-url`…).
+
+### 21.3 Les secrets : le casse-tête résolu proprement
+
+Les playbooks contiennent des mots de passe (Vault Ansible, tokens). Trois niveaux de réponse :
+
+1. **Jamais en clair** dans le dépôt — `ansible-vault` chiffre les variables sensibles, la passphrase vit hors de Git ;
+2. **`.gitignore` préventif** : `*.vaultpass`, `.env`, `*_rsa` dès le premier commit ;
+3. Un hook `pre-commit` anti-secrets (§15) en filet de sécurité.
+
+> [!WARNING]
+> Dans un lab, la tentation de « committer juste pour tester » un mot de passe en clair est forte. C'est exactement comme ça que des labs finissent publics avec des secrets dedans. Le réflexe pro se prend sur SON projet.
+
+### 21.4 Ce que le lab m'apporte comme réflexes Git
+
+| Réflexe | Outil vu dans le cours | Où c'est utile dans le lab |
+|---|---|---|
+| Une brique = une branche + un tag | §8, §13, §18 | Chaque phase du plan |
+| Tester avant de fusionner | PR + CI (§18) | GitLab CI quand la phase 3 sera en place |
+| Rejouer un état passé | tags + `checkout` | Reproduire un bug apparu entre deux jalons |
+| Traquer « qui a changé cette config » | `git blame` / `git log -p` (§19) | Une VM a changé de comportement : retrouver le playbook fautif |
+| Ne rien perdre | reflog (§19) | Manipulations agressives sur les branches de test |
+
+---
+
+## 22. Aide-mémoire (cheat sheet)
 
 ### Le quotidien
 
@@ -1036,7 +1281,9 @@ git bisect start                  # traquer un bug par dichotomie
 
 ---
 
-## 22. Exercices et scénarios corrigés
+## 23. Exercices et scénarios corrigés
+
+> 🛠️ **Chaque exercice a un script de mise en place** dans le [dossier `exercices/`](../exercices/) : il crée l'état initial pour vous, vous n'avez plus qu'à jouer le scénario.
 
 ### Exercice 1 — Le premier cycle ⭐
 
@@ -1151,7 +1398,7 @@ git push --force-with-lease origin feature/api   # branche déjà poussée → a
 
 ---
 
-## 23. Glossaire
+## 24. Glossaire
 
 | Terme | Définition |
 |---|---|
