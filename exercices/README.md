@@ -21,7 +21,16 @@ Lance le script, joue le scénario ; les corrections sont dans les cours (blocs 
 | `setup-net-2-subnetting.sh` | 🎯 **Entraîneur interactif** : questions aléatoires de subnetting, correction immédiate |
 | `setup-net-3-dns-panne.sh` | Simulation de panne DNS (namespace isolé Linux) |
 
-Les exercices 4 et 5 du cours réseau (captures tcpdump, DMZ dans le lab) se jouent directement sur tes VMs — voir le cours.
+## Docker — voir [cours Docker §19](../docker/cours-docker.md#19-exercices-et-scénarios-corrigés)
+
+| Script | Thème |
+|---|---|
+| `setup-docker-1-premiers-pas.sh` | Vérif d'environnement + scénario du premier conteneur |
+| `setup-docker-2-dockerfile.sh` | Dockerfile mal ordonné à optimiser (leçon sur le cache) |
+| `setup-docker-3-compose.sh` | Compose incomplet à compléter (healthcheck, depends_on, volume) |
+| `setup-docker-5-durcissement.sh` | Vérificateur du conteneur durci (score /6) |
+
+Les exercices 1 (nettoyage d'incident disque) et 4 se jouent directement sur app1 — voir le cours §19.
 
 ## Usage
 
