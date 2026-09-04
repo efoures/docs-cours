@@ -32,6 +32,17 @@ Lance le script, joue le scénario ; les corrections sont dans les cours (blocs 
 
 Les exercices 1 (nettoyage d'incident disque) et 4 se jouent directement sur app1 — voir le cours §19.
 
+## Ansible — voir [cours Ansible §20.2](../ansible/cours-ansible.md#202-exercices-et-scénarios-corrigés)
+
+| Script | Thème |
+|---|---|
+| `setup-ansible-1-inventaire.sh` | Inventaire multi-groupes à compléter (web/db/prod) |
+| `setup-ansible-2-playbook-echec.sh` | 🚨 Incident : playbook en échec partiel à diagnostiquer |
+| `setup-ansible-3-vault.sh` | Secrets sous Vault (encrypt_string + no_log) |
+| `setup-ansible-4-drift.sh` | 🚨 Dérive de config : détecter (`--check --diff`), converger |
+
+Les exercices Ansible 2, 3 et 4 se jouent sur un nœud de contrôle Linux/WSL (ansible-core requis) — voir le cours §20.2.
+
 ## Usage
 
 ```bash

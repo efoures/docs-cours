@@ -11,6 +11,7 @@ Mes cours en markdown — support d'apprentissage et de révision, construits au
 | [Git — Le cours complet](git/cours-git.md) | ✅ À jour (sept. 2026) | 24 parties · 14 schémas Mermaid · quiz par section · 5 exercices scriptés · signature GPG/SSH · workflows |
 | [Réseaux — Le cours complet](reseaux/cours-reseaux.md) | ✅ À jour (sept. 2026) | 24 parties · 20+ schémas · fil rouge : le lab réel · subnetting · routage · TCP/DNS/NAT · IPv6 · sécurité · méthode de dépannage |
 | [Docker — Le cours complet](docker/cours-docker.md) | ✅ À jour (sept. 2026) | 20 parties · layers & images · Dockerfile/BuildKit · volumes · réseau · Compose · sécurité (root, caps, Trivy) · CI/CD · durcissement · fil rouge lab |
+| [Ansible — Le cours complet](ansible/cours-ansible.md) | ✅ À jour (sept. 2026) | 20 parties · architecture agentless · playbooks · variables & précédence · Jinja2 · rôles & collections · Vault · AWX/AAP · 4 scénarios entreprise · 4 exercices scriptés |
 
 ### 🛠️ Exercices pratiques
 
@@ -23,8 +24,8 @@ cd exercices && bash setup-exo-2.sh
 ## 🗺️ Feuille de route
 
 - [ ] Linux
-- [ ] Ansible
-- [ ] GIT
+- [x] Ansible
+- [x] GIT
 - [ ] ELK
 - [ ] Terraform
 
