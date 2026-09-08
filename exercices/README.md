@@ -43,6 +43,15 @@ Les exercices 1 (nettoyage d'incident disque) et 4 se jouent directement sur app
 
 Les exercices Ansible 2, 3 et 4 se jouent sur un nœud de contrôle Linux/WSL (ansible-core requis) — voir le cours §20.2.
 
+## Kubernetes — voir [cours Kubernetes §20.2](../kubernetes/cours-kubernetes.md#202-exercices-et-scénarios-corrigés)
+
+| Script | Thème |
+|---|---|
+| `setup-k8s-1-pod-echec.sh` | 🚨 Manifest cassé : tag d'image inexistant + Secret absent (diagnostic `describe`) |
+| `setup-k8s-2-service-vide.sh` | 🚨 Service muet : selector qui ne matche pas les labels des Pods |
+
+Les exercices Kubernetes se jouent sur un cluster local (k3s, kind, minikube) — voir le cours §20.2. Les exercices 3, 4 et 5 (rollout interrompu, OOMKilled, astreinte) se jouent directement, sans script.
+
 ## Usage
 
 ```bash

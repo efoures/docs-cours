@@ -12,6 +12,7 @@ Mes cours en markdown — support d'apprentissage et de révision, construits au
 | [Réseaux — Le cours complet](reseaux/cours-reseaux.md) | ✅ À jour (sept. 2026) | 24 parties · 20+ schémas · fil rouge : le lab réel · subnetting · routage · TCP/DNS/NAT · IPv6 · sécurité · méthode de dépannage |
 | [Docker — Le cours complet](docker/cours-docker.md) | ✅ À jour (sept. 2026) | 20 parties · layers & images · Dockerfile/BuildKit · volumes · réseau · Compose · sécurité (root, caps, Trivy) · CI/CD · durcissement · fil rouge lab |
 | [Ansible — Le cours complet](ansible/cours-ansible.md) | ✅ À jour (sept. 2026) | 20 parties · architecture agentless · playbooks · variables & précédence · Jinja2 · rôles & collections · Vault · AWX/AAP · 4 scénarios entreprise · 4 exercices scriptés |
+| [Kubernetes — Le cours complet](kubernetes/cours-kubernetes.md) | ✅ À jour (sept. 2026) | 20 parties · architecture (control plane/workers) · kubectl & déclaratif · Pods · Deployments/Services · config · réseau & CNI · Ingress/Gateway API · stockage PV/PVC · probes & QoS · scheduling · autoscaling · StatefulSet/DaemonSet/Jobs · RBAC · k3s/Helm/GitOps · 4 scénarios entreprise · 2 exercices scriptés |
 
 ### 🛠️ Exercices pratiques
 
