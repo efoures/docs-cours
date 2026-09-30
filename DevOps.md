@@ -1,10 +1,4 @@
-# Cours complet DevOps — édition septembre 2026
-
-> **Dernière vérification des sources : 30 septembre 2026.**
-> Ce cours couvre l'ensemble du DevOps (culture, CI/CD, IaC, conteneurs, Kubernetes, GitOps, observabilité, sécurité, SRE, Platform Engineering, FinOps, IA) avec les évolutions récentes vérifiées par recherche web. Les schémas sont en **Mermaid** (rendu natif sur GitHub et GitLab).
->
-> ⚠️ Les versions logicielles changent vite : les numéros donnés ici sont ceux constatés à la date ci-dessus. Vérifiez toujours les pages officielles listées dans la section [Sources](#sources).
-
+# Cours complet DevOps 
 ---
 
 ## Sommaire
