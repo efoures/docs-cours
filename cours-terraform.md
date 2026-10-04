@@ -1,4 +1,4 @@
-# Cours complet Terraform — édition octobre 2026
+# Cours complet Terraform
 
 > **Dernière vérification des sources : 30 septembre 2026.**
 > Cours de référence sur Terraform (HashiCorp, groupe IBM) : du premier `terraform init` aux fonctionnalités récentes (ephemeral, actions, list resources, Stacks), avec les différences clés avec OpenTofu. Les schémas sont en **Mermaid** (rendu natif GitHub/GitLab).
