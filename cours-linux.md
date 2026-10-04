@@ -1,9 +1,4 @@
-# Cours complet Linux — de A à Z (édition octobre 2026)
-
-> **Dernière vérification des sources : 4 octobre 2026.**
-> Ce cours couvre Linux de zéro jusqu'au niveau administrateur et DevOps : architecture, ligne de commande, utilisateurs, processus, systemd, paquets, stockage, réseau, scripting, sécurité, performances, conteneurs, noyau, bureau, automatisation et sauvegardes. Les points d'actualité (noyau 7.x, Ubuntu 26.04, Debian 13, systemd 260/261, Wayland, Secure Boot, failles 2026) ont été vérifiés par recherche web.
->
-> ⚠️ Les numéros de version évoluent vite. Les exemples de commandes sont à tester dans une **VM ou un conteneur** avant toute utilisation en production. Les schémas sont en **Mermaid** (rendu natif GitHub/GitLab).
+# Cours complet Linux 
 
 ---
 
