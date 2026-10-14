@@ -320,7 +320,7 @@ Si l'on relie deux switchs par deux câbles, les broadcasts tournent en boucle e
 
 Autres fonctions de switch à connaître : **LACP** (802.3ad / 802.1AX) pour agréger plusieurs ports en un seul lien logique, **port security** (limiter les MAC par port), **DHCP snooping** et **Dynamic ARP Inspection** (contrer les faux serveurs et l'usurpation ARP), **QoS** (priorités), **LLDP** (découverte des voisins), **mirroring** (copie du trafic vers un analyseur).
 
-## 05Adressage IPv4
+## 05 Adressage IPv4
 
 Une adresse IPv4 est un nombre de 32 bits, écrit en quatre octets décimaux : `192.168.10.25`. Elle comporte une partie **réseau** et une partie **hôte**. Le **masque de sous-réseau** (ou la notation CIDR `/24`) indique où se fait la coupure.
 
