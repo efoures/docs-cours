@@ -157,7 +157,7 @@ Les débits se comptent en **bits** (Mb/s) et les fichiers en **octets** (Mo). 1
 
 Autre repère : la lumière met environ 5 ms pour parcourir 1 000 km de fibre. Une latence ne descendra donc jamais sous cette limite physique, quel que soit le matériel.
 
-## 02Modèles OSI et TCP/IP
+## 02 Modèles OSI et TCP/IP
 
 Un modèle en couches découpe un problème complexe en étapes. Chaque couche rend un service à celle du dessus et utilise celle du dessous, sans connaître les détails. Le modèle **OSI** (7 couches) sert de langage commun et de grille de dépannage. Le modèle **TCP/IP** (4 couches) décrit ce qui est réellement utilisé.
 
