@@ -1,1800 +1,1202 @@
-# Réseaux — Le cours complet
+Cours complet · de zéro à l'architecture
 
-![Statut](https://img.shields.io/badge/cours-R%C3%A9seaux-blue) ![Mise à jour](https://img.shields.io/badge/mise_%C3%A0_jour-sept._2026-green) ![Niveau](https://img.shields.io/badge/niveau-d%C3%A9butant_%E2%86%92_avanc%C3%A9-orange) ![Fil rouge](https://img.shields.io/badge/fil_rouge-lab_VirtualBox-purple)
+# Les réseaux informatiques, de A à Z
 
-> Cours à jour (IPv4 + IPv6, Wi-Fi, VPN, outillage moderne). Fil rouge : le réseau réel de mon lab VirtualBox (192.168.56.0/24 + NAT).
-> Exercices pratiques : [dossier `exercices/`](../exercices/).
+Dix-huit chapitres pour comprendre comment deux machines se parlent : câbles, adresses, routage, protocoles, Wi-Fi, sécurité, cloud et dépannage. Chaque chapitre contient des schémas et des tableaux de référence. Lis-les dans l'ordre : chacun s'appuie sur le précédent.
 
----
+Sommaire
 
-## 🧭 Parcours de lecture
+1. [00Vue d'ensemble](#c0)
+2. [01Fondamentaux](#c1)
+3. [02Modèles OSI et TCP/IP](#c2)
+4. [03Couche physique](#c3)
+5. [04Ethernet, switch, VLAN](#c4)
+6. [05Adressage IPv4](#c5)
+7. [06IPv6](#c6)
+8. [07Routage et NAT](#c7)
+9. [08Transport : TCP et UDP](#c8)
+10. [09DNS et DHCP](#c9)
+11. [10Web, HTTP, TLS](#c10)
+12. [11Autres services](#c11)
+13. [12Équipements](#c12)
+14. [13Wi-Fi et mobile](#c13)
+15. [14Sécurité](#c14)
+16. [15Architecture](#c15)
+17. [16Cloud, SDN, SD-WAN](#c16)
+18. [17Supervision, dépannage](#c17)
+19. [18Parcours et glossaire](#c18)
 
-| Vous êtes… | Parcours | Parties | Durée estimée |
-|---|---|---|---|
-| 🌱 **Débutant** | Fondations + LAN + IP + transport | 1 → 7 | ≈ 4 h |
-| 🌿 **Praticien** | Routage, DNS, services, NAT, Wi-Fi | 8 → 14 | ≈ 3 h 30 |
-| 🚀 **Confirmé** | Sécurité, VPN, IPv6, supervision, dépannage | 15 → 21 | ≈ 3 h |
-| 🔍 **Révision rapide** | Cheat sheet + quiz | 22 + quiz | ≈ 30 min |
+## 00Vue d'ensemble
 
-💡 **Méthode conseillée** : chaque partie contient un encadré « 💻 Sur ton lab » avec les commandes à jouer sur vos VMs. Un concept réseau ne rentre vraiment que quand on l'a **observé en vrai**.
-
----
-
-## Table des matières
-
-- [x] [1. Le fil rouge : le réseau de mon lab](#1-le-fil-rouge--le-réseau-de-mon-lab)
-- [x] [2. Pourquoi des couches ? Les modèles OSI et TCP/IP](#2-pourquoi-des-couches--les-modèles-osi-et-tcpip)
-- [x] [3. Couche 1 : le signal et les liens](#3-couche-1--le-signal-et-les-liens)
-- [x] [4. Couche 2 : Ethernet, trames et commutateurs (switches)](#4-couche-2--ethernet-trames-et-commutateurs-switches)
-- [x] [5. ARP : l'annuaire MAC ↔ IP](#5-arp--lannuaire-mac--ip)
-- [x] [6. Adressage IPv4 : adresses, masques et sous-réseaux](#6-adressage-ipv4--adresses-masques-et-sous-réseaux)
-- [x] [7. IP au travail : la table de routage](#7-ip-au-travail--la-table-de-routage)
-- [x] [8. Le routage entre réseaux (routeurs)](#8-le-routage-entre-réseaux-routeurs)
-- [x] [9. TCP et UDP : le transport](#9-tcp-et-udp--le-transport)
-- [x] [10. DNS : l'annuaire du réseau](#10-dns--lannuaire-du-réseau)
-- [x] [11. DHCP : qui distribue les adresses](#11-dhcp--qui-distribue-les-adresses)
-- [x] [12. NAT : partager une seule adresse publique](#12-nat--partager-une-seule-adresse-publique)
-- [x] [13. Applications : HTTP/HTTPS et le chemin complet d'une requête](#13-applications--httphttps-et-le-chemin-complet-dune-requête)
-- [x] [14. Wi-Fi : la couche 2 sans fil](#14-wi-fi--la-couche-2-sans-fil)
-- [x] [15. IPv6 : le futur déjà là](#15-ipv6--le-futur-déjà-là)
-- [x] [16. Sécurité réseau : firewalls, filtrage, segmentation](#16-sécurité-réseau--firewalls-filtrage-segmentation)
-- [x] [17. VPN : tunnels chiffrés](#17-vpn--tunnels-chiffrés)
-- [x] [18. Outils d'observation et de diagnostic](#18-outils-dobservation-et-de-diagnostic)
-- [x] [19. Services avancés : VLAN, bonds, tunnels, QoS](#19-services-avancés--vlan-bonds-tunnels-qos)
-- [x] [20. Supervision et bonnes pratiques d'ingénieur](#20-supervision-et-bonnes-pratiques-dingénieur)
-- [x] [21. Méthode de dépannage : la cascade](#21-méthode-de-dépannage--la-cascade)
-- [x] [22. Aide-mémoire (cheat sheet)](#22-aide-mémoire-cheat-sheet)
-- [x] [23. Exercices et scénarios corrigés](#23-exercices-et-scénarios-corrigés)
-- [x] [24. Glossaire](#24-glossaire)
-
----
-
-## 1. Le fil rouge : le réseau de mon lab
-
-Tout ce cours se réfère à un réseau **réel et manipulable** — le mien. Le garder en tête : chaque concept s'illustre sur ces machines.
-
-### 1.1 L'architecture du lab
+Un réseau est un ensemble d'appareils reliés pour échanger des données selon des règles communes appelées **protocoles**. Tout le cours répond à une seule question : comment un message part d'une application sur une machine, traverse des câbles, des commutateurs et des routeurs, et arrive à la bonne application sur une autre machine.
 
 ```mermaid
-flowchart TB
-    IN["🌐 Internet"] --- B["📶 Box / Routeur domestique<br/>NAT + DHCP<br/>192.168.1.1"]
-    B --- H["💻 Poste Windows<br/>(VirtualBox)<br/>enp3s0: 192.168.1.50/24 (NAT box)"]
-    H --- VB["🖥️ VirtualBox"]
-
-    VB --- NET1["Réseau host-only<br/>192.168.56.0/24"]
-    VB --- NET2["Réseau NAT<br/>(VirtualBox)"]
-
-    NET1 -.-> BA["bastion .10<br/>1 Go"]
-    NET1 -.-> GI["gitlab .11<br/>4 Go"]
-    NET1 -.-> A1["app1 .21<br/>2 Go"]
-    NET1 -.-> A2["app2 .22<br/>2 Go"]
-    NET1 -.-> MO["monitor .31<br/>2 Go"]
-
-    NET2 -.-> BA
-    NET2 -.-> GI
-    NET2 -.-> A1
-    NET2 -.-> A2
-    NET2 -.-> MO
-
-    style NET1 fill:#1a7f37,stroke:#2ea043,color:#fff
-    style NET2 fill:#8250df,stroke:#a371f7,color:#fff
+mindmap
+  root((Réseaux))
+    Bases
+      Types LAN WAN
+      Topologies
+      Débit et latence
+    Modèles
+      OSI 7 couches
+      TCP/IP 4 couches
+    Accès
+      Câbles et fibre
+      Ethernet
+      Switch VLAN STP
+      Wi-Fi 4G 5G
+    Internet
+      IPv4 IPv6
+      Routage OSPF BGP
+      NAT
+    Transport
+      TCP
+      UDP
+      QUIC
+    Applications
+      DNS DHCP
+      HTTP TLS
+      Mail SSH
+    Sécurité
+      Pare-feu
+      VPN
+      Segmentation
+      Zero Trust
+    Moderne
+      Cloud VPC
+      SDN SD-WAN
+      Supervision
 ```
 
-### 1.2 Les deux réseaux de chaque VM
+Carte du cours : les six grands blocs et leurs notions.
 
-Chaque VM possède **deux interfaces** :
+### Ce que tu sauras faire à la fin
 
-| Interface | Réseau | IP (exemple : app1) | Rôle |
-|---|---|---|---|
-| `enp0s3` | host-only 192.168.56.0/24 | `192.168.56.21` | Administration, trafic interne du lab |
-| `enp0s8` | NAT VirtualBox | `10.0.2.15` (fixe chez VirtualBox) | Accès Internet via le poste hôte |
+- Lire et construire un plan d'adressage, découper un réseau en sous-réseaux.
+- Expliquer ce qui se passe quand on tape une adresse dans un navigateur.
+- Configurer le raisonnement d'un switch, d'un routeur, d'un pare-feu.
+- Diagnostiquer une panne avec une méthode, couche par couche.
+- Sécuriser un réseau et comprendre les architectures actuelles, cloud compris.
 
-C'est exactement la topologie d'une vraie entreprise miniature : **un réseau interne isolé** (comme une DMZ/production) + **une sortie Internet contrôlée** (comme un NAT d'entreprise).
+## 01Fondamentaux
 
-### 1.3 Les questions auxquelles ce cours répond
+### Les types de réseaux par taille
 
-Au fil des parties, on répondra concrètement à :
+| Type | Portée | Exemple | Technologies typiques |
+| --- | --- | --- | --- |
+| PAN | quelques mètres | Casque Bluetooth, montre connectée | Bluetooth, NFC, Zigbee |
+| LAN | une pièce à un bâtiment | Réseau d'une maison, d'un bureau | Ethernet, Wi-Fi |
+| MAN | une ville ou un campus | Réseau d'une métropole | Fibre, Metro Ethernet |
+| WAN | pays, monde | Liaison entre deux sites, Internet | MPLS, fibre opérateur, SD-WAN, 4G/5G |
+| SAN | baie de stockage | Serveurs reliés à un stockage | Fibre Channel, iSCSI, NVMe-oF |
 
-- Quand `app1` (192.168.56.21) parle à `gitlab` (192.168.56.11), **qui transporte la trame** et comment le sait-il ? *(§4, §5)*
-- Pourquoi chaque VM a-t-elle **deux adresses MAC et deux adresses IP** ? *(§3, §6)*
-- Comment `gitlab` atteint-il **Internet** alors que son réseau host-only est isolé ? *(§7, §8, §12)*
-- Que se passe-t-il **exactement** quand on tape `apt update` sur le bastion ? *(§9, §10, §13)*
-- Comment **isoler** le trafic des VMs app de celui du gitlab ? *(§16, §19)*
+### Intranet, extranet, Internet
 
-> [!TIP]
-> Gardez une fenêtre SSH ouverte vers `app1` pendant la lecture. Chaque partie se termine par « 💻 Sur ton lab » : 1 à 3 commandes qui **montrent** le concept en vrai.
+- **Internet** : réseau mondial public de réseaux interconnectés.
+- **Intranet** : réseau privé d'une organisation, réservé à ses membres.
+- **Extranet** : partie d'un intranet ouverte à des partenaires ou clients.
 
----
+### Topologies
 
-## 2. Pourquoi des couches ? Les modèles OSI et TCP/IP
-
-### 2.1 Le problème que résolvent les couches
-
-Faire communiquer deux machines est un problème **gigantesque** : signaux électriques, adresses, chemins, fiabilité, formats de données… La réponse des ingénieurs : **diviser pour régner**. Chaque couche résout un problème précis et rend un service à la couche au-dessus, sans en connaître les détails.
-
-```mermaid
-flowchart TB
-    subgraph OSI["Modèle OSI (7 couches — la grille de référence)"]
-        A7["7 · Application — HTTP, DNS, SSH…"]
-        A6["6 · Présentation — encodage, chiffrement TLS"]
-        A5["5 · Session — sessions, établissement"]
-        A4["4 · Transport — TCP, UDP, ports"]
-        A3["3 · Réseau — IP, routage"]
-        A2["2 · Liaison — Ethernet, MAC, switches"]
-        A1["1 · Physique — câbles, signaux, bits"]
-    end
-    style A7 fill:#1f6feb,color:#fff
-    style A6 fill:#388bfd,color:#fff
-    style A5 fill:#58a6ff,color:#000
-    style A4 fill:#9e6a03,color:#fff
-    style A3 fill:#1a7f37,color:#fff
-    style A2 fill:#8250df,color:#fff
-    style A1 fill:#6e7781,color:#fff
-```
-
-Le monde réel utilise le modèle **TCP/IP** (4 couches), plus simple :
-
-| TCP/IP | Équivalent OSI | Exemples | Unité de données |
-|---|---|---|---|
-| Application | 5-6-7 | HTTP, DNS, SSH, SMTP | **Données / message** |
-| Transport | 4 | TCP, UDP | **Segment** (TCP) / datagramme (UDP) |
-| Internet (Réseau) | 3 | IP, ICMP | **Paquet** |
-| Accès réseau (Liaison) | 1-2 | Ethernet, Wi-Fi, ARP | **Trame** / bits |
-
-### 2.2 L'encapsulation : la valise russe
-
-Quand tu envoies une requête HTTP, chaque couche **emballle** les données de la couche supérieure en y ajoutant son propre en-tête :
+La topologie décrit la forme du réseau. Elle peut être **physique** (où passent les câbles) ou **logique** (comment les données circulent). Aujourd'hui, le LAN filaire est presque toujours en étoile, et les datacenters en spine-leaf (chapitre 15).
 
 ```mermaid
 flowchart LR
-    D["📄 Données HTTP"] --> T["➕ En-tête TCP<br/>(ports src/dst)"]
-    T --> I["➕ En-tête IP<br/>(IP src/dst)"]
-    I --> E["➕ En-tête Ethernet<br/>(MAC src/dst) + FCS"]
-    E --> S["⚡ 01101001…<br/>sur le câble"]
+  subgraph Etoile
+    S1["Switch"] --- A1["PC 1"]
+    S1 --- A2["PC 2"]
+    S1 --- A3["Imprimante"]
+    S1 --- A4["Serveur"]
+  end
+  subgraph Maillage
+    M1["R1"] --- M2["R2"]
+    M2 --- M3["R3"]
+    M3 --- M4["R4"]
+    M4 --- M1
+    M1 --- M3
+    M2 --- M4
+  end
 ```
 
-À la réception, le destinateur **désencapsule** dans l'ordre inverse. Le mot-clé à retenir par couche :
+Étoile (un point central) et maillage complet (plusieurs chemins).
 
-| Couche | En-tête contient surtout… | Adresse identifiante |
-|---|---|---|
-| Ethernet (2) | MAC source/destination | **MAC** (physique, locale au réseau) |
-| IP (3) | IP source/destination, TTL, protocole | **IP** (logique, mondiale) |
-| TCP/UDP (4) | Ports source/destination | **Port** (le service sur la machine) |
+| Topologie | Principe | Avantage | Limite |
+| --- | --- | --- | --- |
+| Bus | Un câble commun | Peu de câble | Une coupure arrête tout, obsolète |
+| Anneau | Chaque nœud relié à ses deux voisins | Accès régulé | Une panne peut casser la boucle |
+| Étoile | Tout converge vers un switch | Simple, une panne n'affecte qu'un lien | Le switch central est un point unique de panne |
+| Arbre / hiérarchique | Étoiles reliées entre elles | Extensible | Dépend des liens montants |
+| Maillage | Liens multiples entre nœuds | Redondance maximale | Coûteux, complexe |
 
-> [!IMPORTANT]
-> **La clé de lecture de TOUT le cours** : les adresses MAC changent à **chaque saut** (hop), les adresses IP restent **identiques de bout en bout** (hors NAT). Si tu retiens une seule chose : c'est ça.
+### Modèles de communication
 
-### 🎯 Quiz — Modèles et couches
+- **Client-serveur** : un client demande, un serveur répond (web, mail, base de données).
+- **Pair à pair (P2P)** : chaque machine est à la fois client et serveur (BitTorrent, certaines visios).
 
-1. Un switch travaille à la couche ___, un routeur à la couche ___.
-2. Quelle est l'unité de données de la couche 3 ? De la couche 2 ?
-3. Vrai ou faux : l'adresse MAC de destination d'une trame reste la même du départ à l'arrivée sur Internet.
+Autre distinction : un message peut être envoyé en **unicast** (un destinataire), **broadcast** (tous les appareils du segment), **multicast** (un groupe abonné) ou **anycast** (le plus proche d'un groupe de serveurs identiques, utilisé par le DNS et les CDN).
 
-<details>
-<summary>✅ Réponses</summary>
+### Commutation de circuits et de paquets
 
-1. Couche **2** (liaison), couche **3** (réseau).
-2. Couche 3 : le **paquet**. Couche 2 : la **trame**.
-3. **Faux** : les MAC sont réécrites à chaque saut ; seules les IP restent stables (hors NAT).
-</details>
+Le téléphone historique réservait un circuit dédié pour toute la durée de l'appel. Internet fonctionne en **commutation de paquets** : les données sont découpées en petits paquets qui voyagent indépendamment, chaque routeur choisissant le prochain saut. On partage ainsi mieux les liens, au prix d'une latence variable.
 
----
+### Mesurer un réseau
 
-## 3. Couche 1 : le signal et les liens
+| Grandeur | Définition | Unité |
+| --- | --- | --- |
+| Bande passante | Capacité maximale théorique du lien | bit/s (Mb/s, Gb/s) |
+| Débit (throughput) | Quantité réellement transférée par seconde | bit/s |
+| Goodput | Débit utile, sans les en-têtes ni les retransmissions | bit/s |
+| Latence | Temps d'aller simple d'un paquet | ms |
+| RTT | Temps d'aller-retour (ce que mesure `ping`) | ms |
+| Gigue (jitter) | Variation de la latence | ms |
+| Perte de paquets | Pourcentage de paquets qui n'arrivent pas | % |
 
-### 3.1 Le rôle de la couche 1
+Piège classique
 
-Transporter des **bits** (0 et 1) entre deux équipements, sous forme de signaux : électriques (cuivre), lumineux (fibre), ondes radio (Wi-Fi). Elle ne connaît ni adresses ni structure — juste « transporter la séquence de bits ».
+Les débits se comptent en **bits** (Mb/s) et les fichiers en **octets** (Mo). 1 octet = 8 bits. Une ligne à 100 Mb/s transfère au mieux 12,5 Mo/s.
 
-### 3.2 Les supports
+Autre repère : la lumière met environ 5 ms pour parcourir 1 000 km de fibre. Une latence ne descendra donc jamais sous cette limite physique, quel que soit le matériel.
 
-| Support | Débit typique | Distance max | Où on le trouve |
-|---|---|---|---|
-| Paire torsadée cuivre (RJ45, Cat5e/6/6a) | 1/2.5/10 Gbit/s | 100 m | LAN, bureaux, datacenter cuivre |
-| Fibre optique (monomode/multimode) | 10 → 400 Gbit/s | 550 m → 80+ km | Interbâtiment, opérateurs, datacenter cœur |
-| Wi-Fi (sans fil) | ~0.1 → 2.4 Gbit/s radio | 30-100 m | Mobilité, terminaux |
-| Série / console | 9,6-115,2 kbit/s | 15 m | Administration d'équipements (console RJ45/USB) |
+## 02Modèles OSI et TCP/IP
 
-Le câble RJ45 (paires torsadées) — les 8 fils, 4 paires dont certaines dédiées à l'émission/réception :
+Un modèle en couches découpe un problème complexe en étapes. Chaque couche rend un service à celle du dessus et utilise celle du dessous, sans connaître les détails. Le modèle **OSI** (7 couches) sert de langage commun et de grille de dépannage. Le modèle **TCP/IP** (4 couches) décrit ce qui est réellement utilisé.
 
-```mermaid
-flowchart LR
-    subgraph CABLE["Câble RJ45 (paire torsadée, ex. Gigabit)"]
-        P1["Paire 1 (blanc-orange/orange)"] 
-        P2["Paire 2 (blanc-vert/vert)"]
-        P3["Paire 3 (blanc-bleu/bleu)"]
-        P4["Paire 4 (blanc-brun/brun)"]
-    end
-    P1 -.->|"TX + TX (émission)"| NIC1
-    P2 -.->|"RX + RX (réception)"| NIC1
-```
+| N° | Couche OSI | Rôle | Unité (PDU) | Exemples | TCP/IP |
+| --- | --- | --- | --- | --- | --- |
+| 7 | Application | Services offerts aux programmes | Données | HTTP, DNS, SMTP, SSH | Application |
+| 6 | Présentation | Format, chiffrement, compression | Données | TLS, JSON, JPEG |  |
+| 5 | Session | Ouvrir, maintenir, fermer un dialogue | Données | Sessions RPC, NetBIOS |  |
+| 4 | Transport | Communication de bout en bout, ports | Segment (TCP) / Datagramme (UDP) | TCP, UDP, QUIC | Transport |
+| 3 | Réseau | Adressage logique, routage | Paquet | IP, ICMP, OSPF | Internet |
+| 2 | Liaison de données | Adressage physique, accès au média | Trame | Ethernet, Wi-Fi, ARP, VLAN | Accès réseau |
+| 1 | Physique | Transmission des bits (signal) | Bit | Câble, fibre, radio |  |
 
-> [!NOTE]
-> **Gigabit utilise les 4 paires** (émission ET réception bidirectionnelles). Le fameux « 100 m max » vient de l'**atténuation du signal** au-delà : les erreurs montent, la liaison se dégrade — la longueur est une contrainte physique, pas une convention.
+Moyen mnémotechnique, de la couche 7 à 1 : **A**ucun **P**etit **S**inge **T**ape **R**apidement **L**es **P**ommes (Application, Présentation, Session, Transport, Réseau, Liaison, Physique).
 
-### 3.3 Les équipements de couche 1
+### L'encapsulation
 
-- **Câbles, connecteurs, prises murales** ;
-- **Répéteurs / hubs** (obsolètes) : régénèrent et diffusent le signal **à tout le monde** — un domaine de collision partagé ;
-- **Transceivers / SFP** : modules enfichables qui convertissent (cuivre ↔ fibre) ;
-- **TAP** : point d'écoute passif pour capturer le trafic.
-
-> [!IMPORTANT]
-> Le **hub** est l'anti-modèle : tout le monde reçoit tout (sécurité nulle + collisions). Le switch (§4) l'a remplacé partout. Si un entretien demande « différence hub/switch » : hub = couche 1, diffuse tout, un domaine de collision ; switch = couche 2, apprend les MAC, isole les conversations.
-
-### 3.4 Débit, bande passante, latence
-
-Trois grandeurs distinctes qu'il ne faut pas confondre :
-
-- **Bande passante** : capacité du lien (ex. 1 Gbit/s) — le « débit max théorique » ;
-- **Débit réel** : ce que tu obtiens vraiment, toujours inférieur (overhead protocoles, retransmissions, pertes) ;
-- **Latence** : le temps de traversée (ms) — **cruciale** plus que le débit pour la voix, les jeux, les bases de données. Elle combine : propagation (vitesse lumière dans le support), sérialisation (temps d'émettre les bits), et files d'attente (congestion).
-
-```
-ping vers gitlab (LAN host-only)     : ~0.3 ms
-ping vers un site public (Internet)  : ~10-30 ms
-```
-
-### 💻 Sur ton lab
-
-```bash
-# Sur app1 : vitesse et état de mes interfaces (couche 1 en vue logicielle)
-ip -br link
-# Vois : state UP, et le débit négocié
-ethtool enp0s3 2>/dev/null | grep -i speed || cat /sys/class/net/enp0s3/speed
-```
-
-### 🎯 Quiz — Couche 1
-
-1. Pourquoi le hub est-il mort ? Deux raisons.
-2. Bande passante vs latence : quel paramètre compte le plus pour une session SSH interactive ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. **Sécurité** : tout est diffusé à tous (écoute triviale). **Performance** : un seul domaine de collision, le débit s'effondre dès que plusieurs parlent.
-2. La **latence** : SSH n'échange que quelques Ko/s ; c'est le ping (temps de réponse) qui fait la sensation de fluidité, pas le débit.
-</details>
-
----
-
-## 4. Couche 2 : Ethernet, trames et commutateurs (switches)
-
-### 4.1 L'adresse MAC
-
-Une adresse **MAC** (Media Access Control) identifie une interface réseau **au niveau local** :
-
-- 48 bits, notés en hexadécimal : `08:00:27:aa:bb:cc` ;
-- les 3 premiers octets (**OUI**) identifient le fabricant — `08:00:27` = VirtualBox (que tu verras partout dans le lab) ;
-- gravée en usine (mais modifiable en logiciel — le *spoofing*), **unique par interface** ;
-- **portée : le réseau local uniquement.** Une MAC ne passe jamais un routeur.
-
-```mermaid
-flowchart LR
-    MAC["MAC 08:00:27:aa:bb:cc"]
-    MAC --> OUI["3 premiers octets = OUI<br/>fabricant (VirtualBox)"]
-    MAC --> NIC["3 derniers octets<br/>numéro de série de l'interface"]
-```
-
-### 4.2 La trame Ethernet
-
-```
-┌─────────┬─────────┬──────┬──────────────────────────┬─────┐
-│ MAC dst │ MAC src │ Type │       Données (paquet IP) │ FCS │
-│ 6 octets│ 6 octets│ 2 o. │        46 à 1500 octets   │ 4 o.│
-└─────────┴─────────┴──────┴──────────────────────────┴─────┘
-   "À qui ?"  "De qui ?"  "Que contient-je ?"   le cargo    CRC
-```
-
-- **MAC destination / source** : les adresses physiques locales ;
-- **Type** : ce que transporte la trame — `0x0800` = IPv4, `0x0806` = ARP, `0x86DD` = IPv6 ;
-- **FCS** (Frame Check Sequence) : somme de contrôle — si le CRC ne colle pas, la trame est **jetée** (pas de retransmission à ce niveau) ;
-- **MTU** : taille max des données = **1500 octets** en standard. Un paquet IP plus gros est **fragmenté** (à éviter — voir §9).
-
-### 4.3 Le switch : apprendre et acheminer
-
-Le switch est **l'équipement central de tout LAN**. Son travail tient en deux mécanismes :
+À l'envoi, chaque couche ajoute son en-tête (parfois une fin) autour des données reçues de la couche supérieure. À la réception, chaque couche retire le sien : c'est la désencapsulation.
 
 ```mermaid
 flowchart TB
-    subgraph SW["Switch (table CAM / table MAC)"]
-        T["Port 1 → MAC 08:00:27:10:aa:01 (bastion)<br/>Port 2 → MAC 08:00:27:11:bb:02 (gitlab)<br/>Port 3 → MAC 08:00:27:21:cc:03 (app1)<br/>Port 4 → MAC 08:00:27:22:dd:04 (app2)"]
-    end
-    P1["🔌 bastion"] --- SW
-    P2["🔌 gitlab"] --- SW
-    P3["🔌 app1"] --- SW
-    P4["🔌 app2"] --- SW
-    style T fill:#0d1117
+  D["Données applicatives : requête HTTP"] --> S["Segment TCP : en-tête TCP + données (ports)"]
+  S --> P["Paquet IP : en-tête IP + segment (adresses IP)"]
+  P --> F["Trame Ethernet : en-tête MAC + paquet + FCS (adresses MAC)"]
+  F --> B["Bits sur le câble"]
 ```
 
-1. **Apprendre** : à chaque trame reçue, il note la MAC **source** et le port d'arrivée dans sa **table CAM** (durée de vie ~5 min) ;
-2. **Acheminer** : la MAC destination est dans la table → il n'envoie la trame **que sur le bon port** (unicast). Inconnue → il **diffuse** sur tous les ports (et la réponse l'instruira).
+Encapsulation à l'émission, de l'application vers le câble.
 
-> [!IMPORTANT]
-> Conséquence sécurité : un switch **n'isole pas** les conversations au sens cryptographique — n'importe qui sur le LAN peut toujours usurper une MAC, tenter un ARP spoofing (§5) ou écouter en débordant la table CAM. L'isolation vient du chiffrement (TLS/VPN), pas de la couche 2 seule.
+À retenir
 
-**Diffusion (broadcast)** : une trame destination `FF:FF:FF:FF:FF:FF` va à **tous** les ports. C'est comme ça que ARP demande (§5) et DHCP découvre (§11). **Domaine de broadcast** = un réseau IP (un /24 par exemple). Un LAN trop grand, c'est trop de broadcasts — d'où la segmentation (VLAN, §19).
+- Un **switch** travaille en couche 2 (adresses MAC), un **routeur** en couche 3 (adresses IP).
+- Les adresses MAC changent à chaque saut. Les adresses IP source et destination restent les mêmes de bout en bout (hors NAT).
+- Le dépannage suit l'ordre : couche 1, puis 2, puis 3, puis les couches hautes.
 
-**Boucles et STP** : si on câble deux switches en boucle sans protection, les trames de broadcast tourneraient à l'infini et satureraient tout. Le protocole **STP (Spanning Tree Protocol)** bloque une voie pour transformer la topologie en arbre logique. (Dans VirtualBox tu n'y exposeras jamais, mais dans un vrai réseau ça sauve.)
+## 03Couche physique
 
-### 4.4 Types de cartes et modes
+La couche 1 transporte des bits sous forme de signaux électriques (cuivre), lumineux (fibre) ou radio (Wi-Fi). Elle fixe la distance, le débit et la sensibilité aux interférences.
 
-- **Half-duplex / full-duplex** : le full-duplex (émettre et recevoir en même temps) est le standard — un désaccord de négociation entre deux équipements crée des pertes massives ;
-- **Autonégociation** : vitesse + duplex négociés au branchement ; un lien qui « flappe » (monte/descend) vient souvent d'un défaut de câble ou d'un désaccord de négociation ;
-- **Mode promiscuité (promiscuous)** : la carte accepte **toutes** les trames, pas seulement les siennes — nécessaire pour tcpdump/Wireshark (§18) ;
-- **Promiscuité dans VirtualBox** : c'est l'option « Promiscuous Mode » des cartes VM — autoriser ou non qu'une VM écoute le trafic des autres sur le même réseau virtuel (à laisser **Deny** sauf besoin d'analyse).
+### Câbles en cuivre à paires torsadées
 
-### 💻 Sur ton lab
+| Catégorie | Fréquence | Débit usuel | Distance max. |
+| --- | --- | --- | --- |
+| Cat 5e | 100 MHz | 1 Gb/s | 100 m |
+| Cat 6 | 250 MHz | 1 Gb/s (10 Gb/s jusqu'à 55 m) | 100 m |
+| Cat 6A | 500 MHz | 10 Gb/s | 100 m |
+| Cat 7 / 7A | 600 / 1 000 MHz | 10 Gb/s | 100 m |
+| Cat 8 | 2 000 MHz | 25 ou 40 Gb/s | 30 m (datacenter) |
 
-```bash
-# Sur app1 : mes adresses MAC par interface
-ip -br link
-# La table MAC du "switch" n'est pas visible depuis la VM, mais je peux voir mes voisins via ARP (§5)
+- **UTP** non blindé, **FTP / STP** avec écran, **S/FTP** avec blindage par paire et général.
+- Connecteur **RJ45**. Norme de câblage **T568B** (la plus courante) ; câble droit entre appareils de nature différente, les interfaces modernes détectent seules le croisement (Auto-MDIX).
+- Longueur maximale d'un segment de cuivre : **100 m** (90 m de câble fixe + 2 × 5 m de cordons).
 
-# Quel fabricant ? (OUI de VirtualBox attendu sur les interfaces VM)
-ip link show enp0s3 | grep ether
-```
+### Fibre optique
 
-### 🎯 Quiz — Ethernet et switches
+| Type | Cœur | Distance typique | Usage |
+| --- | --- | --- | --- |
+| Multimode OM3 / OM4 / OM5 | 50 µm | jusqu'à 300 à 550 m en 10G | Bâtiment, datacenter |
+| Monomode OS2 | 9 µm | 10 km à plus de 80 km | Campus, opérateurs, longue distance |
 
-1. Une trame arrive au switch avec une MAC destination **inconnue** de sa table : que fait-il ?
-2. Quelle est la MAC destination d'une requête ARP ? D'un DHCP Discover ?
-3. Pourquoi une MAC ne traverse-t-elle jamais un routeur ?
+La fibre est insensible aux interférences électromagnétiques, ne rayonne pas et offre les débits les plus élevés. Les modules enfichables (transceivers) se nomment **SFP** (1G), **SFP+** (10G), **SFP28** (25G), **QSFP** (40/100G) et leurs successeurs jusqu'à 400G et 800G.
 
-<details>
-<summary>✅ Réponses</summary>
+### Normes Ethernet usuelles
 
-1. Il **diffuse la trame sur tous les ports** (sauf celui d'origine). Si la machine existe, elle répondra et il l'apprendra.
-2. **FF:FF:FF:FF:FF:FF** dans les deux cas : ARP et DHCP découvrent par broadcast.
-3. Parce qu'un routeur **sépare deux réseaux** (deux domaines de broadcast) : la portée d'une MAC est un seul réseau local. Au-delà, seule l'adresse IP (couche 3) a un sens global.
-</details>
+| Nom | Débit | Média |
+| --- | --- | --- |
+| 100BASE-TX | 100 Mb/s | Cuivre Cat 5 |
+| 1000BASE-T | 1 Gb/s | Cuivre Cat 5e |
+| 2.5GBASE-T / 5GBASE-T | 2,5 / 5 Gb/s | Cuivre Cat 5e / 6 (utile pour le Wi-Fi 6 et 7) |
+| 10GBASE-T | 10 Gb/s | Cuivre Cat 6A |
+| 10GBASE-SR / LR | 10 Gb/s | Fibre multimode / monomode |
+| 25G, 40G, 100G, 400G, 800G | jusqu'à 800 Gb/s | Fibre ou DAC (câble cuivre direct, courte distance) |
 
----
+### PoE : alimenter par le câble réseau
 
-## 5. ARP : l'annuaire MAC ↔ IP
+| Norme | Nom commun | Puissance au port | Usage |
+| --- | --- | --- | --- |
+| 802.3af | PoE | 15,4 W | Téléphone IP, caméra simple |
+| 802.3at | PoE+ | 30 W | Point d'accès Wi-Fi, caméra PTZ |
+| 802.3bt | PoE++ | 60 W / 90 W | Wi-Fi 6/7 haut de gamme, écrans, éclairage |
 
-### 5.1 Le problème qu'ARP résout
+### Notions de signal
 
-Je suis `app1` (192.168.56.21) et je veux parler à `gitlab` (192.168.56.11). Je connais **l'IP destination** (on verra au §7 comment j'ai su qu'elle est locale). Mais pour construire la **trame Ethernet**, il me faut **la MAC destination**. Comment la trouver ?
+- **Atténuation** : le signal faiblit avec la distance.
+- **Diaphonie** et **bruit** : interférences entre paires ou venant de l'extérieur.
+- **Duplex** : le *half-duplex* émet ou reçoit à tour de rôle (hubs, anciens réseaux), le *full-duplex* émet et reçoit en même temps (tout le Ethernet commuté moderne).
 
-**C'est le rôle d'ARP** (Address Resolution Protocol) : *« Qui a 192.168.56.11 ? Donne-moi ta MAC. »*
+Panne fréquente
 
-### 5.2 Le déroulé complet
+Un lien qui monte à 100 Mb/s au lieu de 1 Gb/s vient souvent d'un câble abîmé ou d'un connecteur mal serti (seules 2 paires sur 4 fonctionnent). Un « duplex mismatch » (un côté en auto, l'autre figé) provoque des performances dégradées et des erreurs CRC.
 
-```mermaid
-sequenceDiagram
-    participant A as app1 (192.168.56.21)
-    participant S as Switch (diffuse)
-    participant G as gitlab (192.168.56.11)
+## 04Ethernet, switch et VLAN
 
-    Note over A: Je veux parler à 192.168.56.11.<br/>Pas de MAC en cache → ARP !
-    A->>S: ARP Request (broadcast MAC FF:FF…)<br/>"Qui a 192.168.56.11 ?"
-    S->>G: Diffusion sur tous les ports
-    Note over G: C'est moi ! (et je note au passage<br/>l'IP+MAC d'app1 dans MON cache)
-    G->>A: ARP Reply (unicast)<br/>"192.168.56.11 = 08:00:27:11:bb:02"
-    Note over A: J'enregistre dans mon cache ARP<br/>(durée ~ quelques minutes)
-    A->>G: La vraie conversation peut commencer<br/>(trame unicast MAC→MAC)
-```
+### Adresse MAC
 
-**Points clés :**
+Une adresse MAC identifie une interface réseau sur le segment local. Elle fait 48 bits, écrite en hexadécimal : `3C:52:82:1A:9B:04`. Les 24 premiers bits désignent le fabricant (OUI), les 24 suivants l'interface. L'adresse de broadcast est `FF:FF:FF:FF:FF:FF`. Beaucoup de téléphones et ordinateurs utilisent aujourd'hui des MAC aléatoires par réseau Wi-Fi pour protéger la vie privée.
 
-- La requête est un **broadcast** (tout le LAN la voit) ; la réponse est un **unicast** direct ;
-- **Chacun** apprend au passage : gitlab note l'association d'app1 dans son propre cache ;
-- Le cache ARP a une **durée de vie** (quelques minutes) : les entrées périmées sont re-demandées ;
-- Un hôte peut **proclamer** son association sans demander (gratuituous ARP) — utilisé après un basculement d'IP (failover, VRRP).
+### Trame Ethernet II
 
-### 5.3 Le piège : ARP spoofing
+| Champ | Taille | Contenu |
+| --- | --- | --- |
+| Préambule + SFD | 8 octets | Synchronisation (géré par le matériel) |
+| MAC destination | 6 octets | Qui doit recevoir la trame |
+| MAC source | 6 octets | Qui l'a émise |
+| Étiquette 802.1Q (optionnelle) | 4 octets | Numéro de VLAN et priorité |
+| EtherType | 2 octets | Protocole transporté : 0x0800 IPv4, 0x86DD IPv6, 0x0806 ARP |
+| Données | 46 à 1 500 octets | Le paquet (c'est le **MTU** de 1 500) |
+| FCS | 4 octets | Contrôle d'erreur (CRC) |
 
-Rien ne **prouve** une réponse ARP. Un attaquant peut répondre : *« 192.168.56.1, c'est moi ! »* — et intercepter tout le trafic (**MITM**, Man In The Middle). C'est l'attaque LAN la plus classique.
+Les « jumbo frames » (jusqu'à 9 000 octets) existent dans les réseaux de stockage et de datacenter, à condition que tout le chemin les supporte.
 
-Défenses : **Dynamic ARP Inspection** (switchs pro), port security, segmentation (VLAN), et surtout **chiffrement de bout en bout** (TLS/SSH/VPN) qui rend l'interception inutile même réussie.
+### Le switch (commutateur)
 
-### 💻 Sur ton lab
+Un switch apprend quelle MAC se trouve derrière quel port, et stocke cela dans sa **table CAM** (table d'adresses MAC).
 
-```bash
-# Sur app1 : voir le cache ARP en action
-ip neigh show
-# 192.168.56.11 dev enp0s3 lladdr 08:00:27:xx:xx:xx REACHABLE  ← gitlab
+1. **Apprentissage** : à chaque trame reçue, il note MAC source → port d'arrivée.
+2. **Filtrage / transfert** : si la MAC destination est connue, il envoie la trame uniquement sur le bon port.
+3. **Inondation (flooding)** : si la destination est inconnue, ou si c'est un broadcast, il envoie sur tous les ports sauf celui d'arrivée.
 
-# Forcer une résolution fraîche (on vide puis on parle)
-sudo ip neigh flush all
-ping -c1 192.168.56.11 >/dev/null
-ip neigh show          # l'entrée est revenue !
-```
+Chaque port d'un switch forme son propre **domaine de collision**. L'ensemble des ports d'un même VLAN forme un **domaine de broadcast**. Un routeur sépare les domaines de broadcast.
 
-### 🎯 Quiz — ARP
+### ARP : de l'IP à la MAC
 
-1. Pourquoi ARP est-il indispensable ? Quel lien avec le modèle en couches ?
-2. Une machine sur le réseau 192.168.56.0/24 demande la MAC de 8.8.8.8 : que se passe-t-il ?
-3. Pourquoi l'ARP spoofing est-il si dangereux ? Quelle défense « propre » ?
+Pour envoyer un paquet à `192.168.1.20` sur le même réseau, la machine doit connaître sa MAC. Elle diffuse « Qui a 192.168.1.20 ? », la machine concernée répond avec sa MAC, et le résultat est gardé dans le **cache ARP**. En IPv6, c'est le protocole NDP qui joue ce rôle.
 
-<details>
-<summary>✅ Réponses</summary>
+### VLAN : découper un switch en plusieurs réseaux logiques
 
-1. IP (couche 3) choisit la destination, mais **Ethernet (couche 2)** n'achemine que par MAC. ARP est le **pont** entre les deux : il traduit IP→MAC. Sans lui, aucune trame ne peut être construite.
-2. Il ne demande **jamais** la MAC d'une IP distante : 8.8.8.8 n'est pas locale, donc il envoie à sa **passerelle** — et il ne demande à ARP… que la MAC de la passerelle.
-3. Parce qu'ARP **n'authentifie rien** : n'importe qui peut prétendre être la passerelle et devenir MITM. Défense structurelle : le chiffrement de bout en bout (TLS/VPN), complété par DAI/port-security sur les switchs pro.
-</details>
+Un **VLAN** (802.1Q) sépare des groupes de machines au niveau 2, même branchés sur le même switch. Il réduit les broadcasts et sert à segmenter pour la sécurité. Les VLAN vont de 1 à 4094. Deux types de ports :
 
----
-
----
-
-## 6. Adressage IPv4 : adresses, masques et sous-réseaux
-
-### 6.1 L'adresse IPv4 : 32 bits qui ont un sens
-
-Une adresse IPv4 = **32 bits**, notés en 4 octets décimaux : `192.168.56.21` = `11000000.10101000.00111000.00010101`.
-
-Une adresse ne désigne pas « une machine » mais **une interface** (une carte réseau). Ton poste a une IP par réseau auquel il participe — d'où les deux IP de chaque VM du lab.
-
-### 6.2 Le masque : séparer réseau et hôte
-
-L'adresse se lit en deux parties : **le préfixe réseau** (quelle rue ?) et **l'identifiant d'hôte** (quel numéro dans la rue ?). Le **masque** dit où se fait la coupe :
-
-```
-192.168.56.21/24        ← notation CIDR : 24 premiers bits = réseau
-masque : 255.255.255.0  ← la même chose en notation « historique »
-
-Réseau    : 192.168.56.0     (les 24 premiers bits)
-Hôtes     : de .1 à .254
-Broadcast : 192.168.56.255   (parler à TOUS le réseau)
-```
-
-> [!IMPORTANT]
-> **Le réflexe fondamental** : pour savoir si une IP destination est « locale » ou « distante », je fais un **ET logique** entre son adresse et **mon** masque, et je compare avec **mon** réseau. Identique → locale (je lui parle en direct, §4-5). Différent → distante (je passe par ma passerelle, §7-8). **C'est ce calcul que fait ta machine à chaque paquet.**
-
-### 6.3 Les règles des sous-réseaux
-
-Dans tout sous-réseau IPv4 :
-- **l'adresse « tout à zéro »** (`192.168.56.0`) désigne **le réseau lui-même** — non attribuable ;
-- **l'adresse « tout à un »** (`192.168.56.255`) est **le broadcast** — non attribuable ;
-- il reste donc **2ⁿ − 2 hôtes** utilisables pour n bits d'hôte.
-
-Tailles courantes (CIDR) :
-
-| CIDR | Masque | Hôtes utiles | Usage typique |
-|---|---|---|---|
-| /30 | 255.255.255.252 | 2 | Liens point-à-point (routeur↔routeur) |
-| /29 | 255.255.255.248 | 6 | Petite DMZ |
-| /28 | 255.255.255.240 | 14 | Sous-réseau serveurs |
-| /26 | 255.255.255.192 | 62 | Département |
-| /24 | 255.255.255.0 | 254 | **Le LAN classique (notre lab)** |
-| /23 | 255.255.254.0 | 510 | LAN moyen |
-| /16 | 255.255.0.0 | 65 534 | Site entier |
-
-### 6.4 Découper : le sous-réseauçage (subnetting)
-
-Besoin : dans 192.168.56.0/24, séparer **serveurs** / **admin** / **apps**. On emprunte des bits au champ hôte :
-
-```mermaid
-flowchart TB
-    B["192.168.56.0/24<br/>(254 hôtes, un seul réseau)"] --> C1["192.168.56.0/26<br/>SRV : .1 à .62"]
-    B --> C2["192.168.56.64/26<br/>ADMIN : .65 à .126"]
-    B --> C3["192.168.56.128/26<br/>APPS : .129 à .190"]
-    style C1 fill:#1a7f37,color:#fff
-    style C2 fill:#1f6feb,color:#fff
-    style C3 fill:#9e6a03,color:#fff
-```
-
-| Sous-réseau | Plage hôtes | Broadcast |
-|---|---|---|
-| 192.168.56.0/26 | .1 – .62 | .63 |
-| 192.168.56.64/26 | .65 – .126 | .127 |
-| 192.168.56.128/26 | .129 – .190 | .191 |
-
-**La méthode en 3 questions** (à toujours se poser) : *combien de sous-réseaux ? quelle taille d'hôte ? où tombent les frontières ?* Les frontières d'un /26 tombent sur des multiples de 64 (0, 64, 128, 192) — les multiples du « pas ».
-
-> [!TIP]
-> Entraîne-toi à faire ce calcul **de tête** : « Où tombe 192.168.56.173/26 ? » → pas de 64 → 128 ≤ 173 < 192 → sous-réseau .128, broadcast .191. C'est LA question d'entretien réseau par excellence.
-
-### 6.5 Les adresses particulières (à connaître par cœur)
-
-| Bloc | Rôle |
-|---|---|
-| `127.0.0.0/8` (souvent `127.0.0.1`) | **Loopback** — « moi-même », jamais sur le fil |
-| `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` | **Privé** (RFC 1918) — non routable sur Internet, le monde des LAN |
-| `169.254.0.0/16` | **APIPA** (link-local) — s'auto-attribuée quand DHCP échoue. **La voir = signal d'alarme** (§21) |
-| `0.0.0.0/0` | Route par défaut / « n'importe quelle adresse » |
-| `255.255.255.255` | Broadcast limité (DHCP Discover) |
-| `100.64.0.0/10` | CGNAT (NAT opérateur) |
-
-> [!NOTE]
-> Ton lab est entièrement dans le **privé** (192.168.56.0/24 host-only + 10.0.2.0/24 NAT VirtualBox) — c'est le cas de quasiment toute infrastructure d'entreprise. Le monde public n'est rejoint que via le NAT (§12).
-
-### 💻 Sur ton lab
-
-```bash
-# Sur app1 : mon adresse, mon masque, mon réseau, mon broadcast
-ip -br addr show enp0s3
-ip calc 2>/dev/null || python3 -c "
-ip='192.168.56.21/24'
-import ipaddress
-n=ipaddress.ip_interface(ip)
-print(f'adresse {n.ip}  réseau {n.network.network_address}  broadcast {n.network.broadcast_address}')
-"
-```
-
-### 🎯 Quiz — Adressage
-
-1. Combien d'hôtes utiles dans un /28 ? Quelles sont les 2 adresses retirées ?
-2. `app1` (192.168.56.21/24) veut parler à 192.168.56.11, puis à 8.8.8.8. Dans chaque cas, locale ou distante ? Comment le sait-il ?
-3. Une machine affiche 169.254.10.30 : diagnostic ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. 2⁴ − 2 = **14 hôtes** ; on retire l'adresse du réseau (.0 du bloc) et le broadcast (la dernière).
-2. 192.168.56.11 : **locale** (ET logique avec /24 → 192.168.56.0 = mon réseau). 8.8.8.8 : **distante** (8.8.8.0 ≠ 192.168.56.0) → j'envoie à ma passerelle.
-3. **DHCP en échec** : la machine s'est auto-attribué une adresse APIPA. Vérifier le serveur DHCP, le câble/VLAN, ou le scope.
-</details>
-
----
-
-## 7. IP au travail : la table de routage
-
-### 7.1 La décision de chaque paquet
-
-À chaque paquet émis, la machine consulte sa **table de routage** :
-
-> « Pour atteindre la destination X, par quelle **interface** et vers quel **prochain saut** (next-hop) ? »
-
-```mermaid
-flowchart TB
-    P["Paquet vers DEST"] --> R{"DEST ∈ une route<br/>de ma table ?"}
-    R -->|plus longue correspondance| NH["→ envoyer via INTERFACE<br/>vers NEXT-HOP (passerelle)"]
-    R -->|aucune| D["❌ 'Network is unreachable'"]
-    style R fill:#9e6a03,color:#fff
-```
-
-La table d'une VM du lab (typique) :
-
-```
-$ ip route
-default via 10.0.2.2 dev enp0s8 proto dhcp metric 100     ← route par défaut
-10.0.2.0/24 dev enp0s8 proto kernel scope link src 10.0.2.15
-192.168.56.0/24 dev enp0s3 proto kernel scope link src 192.168.56.21
-```
-
-**Lecture** (c'est LA compétence) :
-- `192.168.56.0/24 dev enp0s3` → toute destination dans ce /24 part sur `enp0s3`, **en direct** (ARP, §5) ;
-- `default via 10.0.2.2 dev enp0s8` → **tout le reste** part vers la passerelle `10.0.2.2` (le routeur NAT de VirtualBox) ;
-- `proto kernel` = route posée automatiquement par l'adresse IP elle-même (connected) ; `proto dhcp` = posée par DHCP.
-
-### 7.2 La règle du préfixe le plus long (longest prefix match)
-
-Si plusieurs routes correspondent, **la plus spécifique gagne** (le plus grand /n) :
-
-```
-192.168.0.0/16   via 10.0.2.9      ← route générique
-192.168.56.0/24  dev enp0s3        ← route spécifique → ELLE gagne pour .56.x
-```
-
-> [!IMPORTANT]
-> **Le concept qui explique tout le routage** : les routeurs ne « connaissent » pas Internet. Ils appliquent mécaniquement cette règle à leur table. Tout le métier de routage (statique, dynamique, BGP — §8) revient à **remplir et maintenir ces tables**.
-
-### 7.3 La passerelle (gateway)
-
-La passerelle est simplement **l'IP d'un routeur sur MON réseau** — atteignable en direct (couche 2/ARP), et qui sait continuer le chemin. Sans passerelle sur un réseau isolé : pas de sortie (le host-only du lab en est l'exemple parfait : pas de gateway configurée sur cette interface, donc aucune sortie possible par là).
-
-### 💻 Sur ton lab
-
-```bash
-# Sur app1 : ma table de routage, puis tracer la décision
-ip route
-ip route get 192.168.56.11    # → via enp0s3 (local)
-ip route get 8.8.8.8          # → via 10.0.2.2 dev enp0s8 (NAT)
-```
-
-### 🎯 Quiz — Table de routage
-
-1. À quoi sert la route `default` ? Que se passe-t-il sans elle ?
-2. Routes présentes : `10.0.0.0/8 via A` et `10.2.3.0/24 via B`. Où part un paquet vers 10.2.3.4 ?
-3. D'où viennent les routes `proto kernel` sans intervention manuelle ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Capturer **tout le reste** (0.0.0.0/0). Sans elle, toute destination hors des routes connues → « Network is unreachable » : réseau isolé.
-2. Via **B** : /24 est plus spécifique que /8 (**longest prefix match**).
-3. Elles sont **dérivées automatiquement** de l'adressage des interfaces : poser `192.168.56.21/24` sur une carte crée la route du /24 connecté.
-</details>
-
----
-
-## 8. Le routage entre réseaux (routeurs)
-
-### 8.1 Le routeur : la machine qui relie les réseaux
-
-Un **routeur** est un équipement qui possède **une interface dans chaque réseau** qu'il relie, et qui fait traverser les paquets de l'une à l'autre :
+- **Port d'accès** : appartient à un seul VLAN, la trame n'est pas étiquetée (PC, imprimante).
+- **Port trunk** : transporte plusieurs VLAN entre switchs, chaque trame porte une étiquette 802.1Q. Le VLAN natif circule sans étiquette.
 
 ```mermaid
 flowchart LR
-    subgraph R1["🚪 Routeur / passerelle"]
-        N1["Interface réseau A<br/>192.168.56.1"] --- R["Décision de routage<br/>(longest prefix match)"] --- N2["Interface réseau B<br/>10.0.2.2"]
-    end
-    LA["LAN 192.168.56.0/24<br/>(bastion, gitlab, apps…)"] --- N1
-    N2 --- LB["Réseau amont<br/>(NAT VirtualBox → Internet)"]
-    style LA fill:#1a7f37,color:#fff
-    style LB fill:#8250df,color:#fff
+  subgraph SW1["Switch A"]
+    A1["PC compta : VLAN 10"]
+    A2["PC RH : VLAN 20"]
+  end
+  subgraph SW2["Switch B"]
+    B1["PC compta : VLAN 10"]
+    B2["Caméra : VLAN 30"]
+  end
+  SW1 ===|"Trunk 802.1Q : VLAN 10, 20, 30"| SW2
+  SW2 --- R["Routeur ou switch L3"]
 ```
 
-**Ce que fait le routeur en recevant un paquet** :
-1. reçoit la trame sur l'interface A, vérifie le CRC, désencapsule le **paquet IP** ;
-2. décrémente le **TTL** (anti-boucle : à 0, jeté + message ICMP « Time Exceeded ») ;
-3. consulte **sa** table de routage pour la destination ;
-4. **ré-encapsule dans une NOUVELLE trame** : MAC source = interface de sortie, MAC destination = résolue par ARP sur le réseau de sortie (les IP, elles, ne bougent pas — §2.2) ;
-5. émet.
+Deux VLAN ne communiquent qu'en passant par un routeur ou un switch de niveau 3 (routage inter-VLAN).
 
-> [!IMPORTANT]
-> C'est ici que le concept §2.2 se matérialise : **à chaque routeur, la trame est réécrite, le paquet est conservé.** TTL qui baisse, MAC qui changent, IP qui restent.
+Le **routage inter-VLAN** se fait avec un routeur à sous-interfaces (« router-on-a-stick ») ou, plus souvent, avec un switch L3 et des interfaces virtuelles **SVI**.
 
-### 8.2 Routage statique vs dynamique
+### STP : éviter les boucles
 
-| | Statique | Dynamique (OSPF, BGP…) |
-|---|---|---|
-| Principe | Routes écrites à la main | Les routeurs **s'échangent** leurs routes |
-| Où | Petits réseaux, liens fixes, lab | Grandes infrastructures, redondances |
-| Avantage | Simple, prévisible, sûr | S'adapte aux pannes (convergence) |
-| Limite | Ne survit pas à un changement de topologie | Complexité, nécessite confiance + filtrage |
+Si l'on relie deux switchs par deux câbles, les broadcasts tournent en boucle et saturent le réseau (tempête de broadcast). Le **Spanning Tree Protocol** désigne un pont racine, calcule un arbre sans boucle et met en attente (blocage) les liens redondants, prêts à reprendre en cas de panne.
 
-```bash
-# Route statique : "pour joindre 10.20.0.0/16, passe par 192.168.56.1"
-sudo ip route add 10.20.0.0/16 via 192.168.56.1 dev enp0s3
-```
+| Variante | Norme | Particularité |
+| --- | --- | --- |
+| STP | 802.1D | Convergence lente (30 à 50 s) |
+| RSTP | 802.1w | Convergence en quelques secondes, standard actuel |
+| MSTP | 802.1s | Plusieurs instances, regroupe des VLAN par arbre |
 
-Aperçu des protocoles dynamiques (pour culture d'ingénieur) : **OSPF** (IGP interne, à état de liens, converge vite) ; **BGP** (le protocole d'Internet : les opérateurs échangent ~1 million de préfixes ; c'est une faute de config BGP qui a fait tomber Facebook mondial en 2021).
+Autres fonctions de switch à connaître : **LACP** (802.3ad / 802.1AX) pour agréger plusieurs ports en un seul lien logique, **port security** (limiter les MAC par port), **DHCP snooping** et **Dynamic ARP Inspection** (contrer les faux serveurs et l'usurpation ARP), **QoS** (priorités), **LLDP** (découverte des voisins), **mirroring** (copie du trafic vers un analyseur).
 
-### 8.3 ICMP : le messager du réseau
+## 05Adressage IPv4
 
-**ICMP** (Internet Control Message Protocol) transporte les messages d'erreur et de contrôle d'IP :
+Une adresse IPv4 est un nombre de 32 bits, écrit en quatre octets décimaux : `192.168.10.25`. Elle comporte une partie **réseau** et une partie **hôte**. Le **masque de sous-réseau** (ou la notation CIDR `/24`) indique où se fait la coupure.
 
-- **Echo request/reply** → le `ping` (test de joignabilité couche 3) ;
-- **Time Exceeded** → le `traceroute` (chaque routeur décrémente le TTL et prévient quand il le jette) ;
-- **Destination Unreachable** (réseau, port, filtrage…) — l'information de diagnostic la plus utile du monde.
+### Lire un masque
 
 ```
-$ traceroute 8.8.8.8
- 1  10.0.2.2 (10.0.2.2)   0.4 ms   ← ma passerelle NAT
- 2  192.168.1.1 (box)     2.1 ms   ← le routeur domestique
- 3  orange.edge…          9.8 ms   ← le FAI
- ...                               ← chaque ligne = un routeur qui a "tué" une sonde TTL
+Adresse   192.168.10.25    = 11000000.10101000.00001010.00011001
+Masque /24 255.255.255.0   = 11111111.11111111.11111111.00000000
+                              |---- réseau (24 bits) ----|-hôte-|
+Réseau    192.168.10.0     (adresse AND masque)
+Broadcast 192.168.10.255   (tous les bits hôte à 1)
+Hôtes     192.168.10.1 à 192.168.10.254  (254 adresses utilisables)
 ```
 
-> [!WARNING]
-> ICMP est souvent **filtré**. Un `ping` qui échoue ne prouve pas que le service est mort — seulement que l'ICMP ne passe pas. À l'inverse, bloquer tout ICMP casse la découverte de MTU (PMTUD) et des erreurs utiles : filtrer sélectivement, pas aveuglément.
+### Tableau de référence CIDR
 
-### 💻 Sur ton lab
+| CIDR | Masque | Adresses | Hôtes utilisables | Usage courant |
+| --- | --- | --- | --- | --- |
+| /8 | 255.0.0.0 | 16 777 216 | 16 777 214 | Très grand réseau (10.0.0.0/8) |
+| /16 | 255.255.0.0 | 65 536 | 65 534 | Grand site, VPC cloud |
+| /20 | 255.255.240.0 | 4 096 | 4 094 | Campus |
+| /24 | 255.255.255.0 | 256 | 254 | Réseau local classique |
+| /25 | 255.255.255.128 | 128 | 126 | Demi-réseau |
+| /26 | 255.255.255.192 | 64 | 62 | Petit service |
+| /27 | 255.255.255.224 | 32 | 30 | Petit service |
+| /28 | 255.255.255.240 | 16 | 14 | Serveurs, DMZ |
+| /29 | 255.255.255.248 | 8 | 6 | Liaison avec quelques équipements |
+| /30 | 255.255.255.252 | 4 | 2 | Lien point à point entre deux routeurs |
+| /31 | 255.255.255.254 | 2 | 2 (RFC 3021) | Point à point, économie d'adresses |
+| /32 | 255.255.255.255 | 1 | 1 | Une seule machine (loopback, route d'hôte) |
 
-```bash
-# Sur app1 : tracer le chemin vers Internet — la chaîne des routeurs réelle
-traceroute -n 1.1.1.1    # (ou tracepath 1.1.1.1)
-# Ligne 1 : 10.0.2.2 (NAT VirtualBox) → ligne suivante : ton réseau domestique...
+Formule : hôtes utilisables = 2(32 − préfixe) − 2 (on retire l'adresse de réseau et celle de broadcast).
 
-# Le TTL en action, vu autrement :
-ping -c1 -t1 8.8.8.8     # TTL=1 : la passerelle répond "Time Exceeded" — elle est le 1er saut
+### Plages réservées à connaître
+
+| Plage | Rôle |
+| --- | --- |
+| 10.0.0.0/8 | Privée (RFC 1918) |
+| 172.16.0.0/12 | Privée (de 172.16.0.0 à 172.31.255.255) |
+| 192.168.0.0/16 | Privée |
+| 100.64.0.0/10 | Espace CGNAT des opérateurs (RFC 6598) |
+| 127.0.0.0/8 | Loopback, la machine elle-même (127.0.0.1) |
+| 169.254.0.0/16 | APIPA / link-local : adresse auto-attribuée quand le DHCP ne répond pas |
+| 224.0.0.0/4 | Multicast |
+| 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24 | Documentation et exemples |
+
+Les anciennes « classes » A, B, C ne sont plus utilisées pour allouer des adresses : on parle de **CIDR** (Classless Inter-Domain Routing) avec des préfixes de longueur libre.
+
+### Exemple de découpage
+
+Tu disposes de `192.168.10.0/24` et tu veux 4 sous-réseaux égaux. Il faut emprunter 2 bits (2² = 4), donc passer de /24 à /26. Chaque bloc fait 64 adresses.
+
+| Sous-réseau | Réseau | Plage utilisable | Broadcast |
+| --- | --- | --- | --- |
+| 1 | 192.168.10.0/26 | .1 à .62 | 192.168.10.63 |
+| 2 | 192.168.10.64/26 | .65 à .126 | 192.168.10.127 |
+| 3 | 192.168.10.128/26 | .129 à .190 | 192.168.10.191 |
+| 4 | 192.168.10.192/26 | .193 à .254 | 192.168.10.255 |
+
+#### Autre exemple : à quel réseau appartient 172.16.5.77/20 ?
+
+Un /20 donne un bloc de 16 dans le 3e octet (256 − 240). Le multiple de 16 inférieur ou égal à 5 est 0, donc réseau `172.16.0.0/20`, broadcast `172.16.15.255`.
+
+### VLSM : des masques de tailles différentes
+
+Le **VLSM** (Variable Length Subnet Mask) attribue à chaque réseau un masque adapté à ses besoins : on alloue d'abord les plus gros besoins, puis les plus petits. Exemple : 100 postes (/25), 50 postes (/26), 10 serveurs (/28), liens routeurs (/30).
+
+Méthode pour toute question d'adressage
+
+1. Calcule le nombre d'hôtes nécessaires, ajoute 2 et prends la puissance de 2 supérieure.
+2. Déduis le préfixe : 32 − nombre de bits d'hôtes.
+3. Trouve la taille de bloc (256 − valeur de l'octet du masque) et aligne les réseaux sur ce bloc.
+
+Le plan d'adressage doit aussi prévoir la croissance : garde de la marge et regroupe les blocs par site ou par fonction pour pouvoir résumer les routes.
+
+## 06IPv6
+
+IPv4 offre environ 4,3 milliards d'adresses, épuisées depuis les années 2010 à l'échelle des registres. **IPv6** utilise 128 bits, soit 3,4 × 1038 adresses. Son déploiement progresse régulièrement : une part importante du trafic des grands services mondiaux l'utilise désormais, avec de fortes différences selon les pays et les opérateurs.
+
+### Écriture
+
+```
+2001:0db8:0000:0000:0000:0000:0000:0001
+Règle 1 : on supprime les zéros de tête de chaque groupe  → 2001:db8:0:0:0:0:0:1
+Règle 2 : une seule suite de groupes à zéro devient ::    → 2001:db8::1
 ```
 
-### 🎯 Quiz — Routage
+Un réseau local reçoit presque toujours un préfixe **/64** : 64 bits de réseau, 64 bits d'identifiant d'interface. Un site reçoit en général un /48 ou un /56 de son fournisseur.
 
-1. Qu'est-ce qui empêche un paquet de tourner en boucle infinie ? Quel outil s'en sert ?
-2. Un paquet traverse 3 routeurs : combien de trames différentes, combien de paquets, combien de fois les IP changent-elles ?
-3. Pourquoi le traceroute affiche-t-il des `* * *` sur certaines lignes ?
+### Types d'adresses
 
-<details>
-<summary>✅ Réponses</summary>
+| Type | Préfixe | Rôle |
+| --- | --- | --- |
+| Global unicast (GUA) | 2000::/3 | Adresse publique routable sur Internet |
+| Link-local | fe80::/10 | Valable sur le lien seulement, présente sur toute interface IPv6 |
+| Unique local (ULA) | fc00::/7 (fd00::/8 en pratique) | Équivalent des adresses privées |
+| Multicast | ff00::/8 | Groupes (remplace le broadcast, qui n'existe plus) |
+| Loopback | ::1 | La machine elle-même |
+| Documentation | 2001:db8::/32 | Exemples |
 
-1. Le **TTL**, décrémenté à chaque routeur (jeté à 0). `traceroute` l'exploite volontairement (TTL=1, 2, 3…) pour cartographier le chemin.
-2. **4 trames** (1 par segment + réémission à chaque routeur), **1 paquet** (le même), IP src/dst **jamais modifiées** (hors NAT).
-3. Ces sauts **ne répondent pas en ICMP** (équipements qui dépriorisent/filtrent ICMP) — le saut est traversé quand même ; seules des `*` sur TOUTES les lignes ensuite signifieraient un vrai blocage.
-</details>
+### Configuration automatique
 
----
+- **SLAAC** : la machine écoute les annonces de routeur (RA) qui donnent le préfixe, puis fabrique son adresse seule. Les systèmes modernes utilisent des identifiants aléatoires et temporaires pour la vie privée.
+- **DHCPv6** : attribution gérée, ou informations complémentaires (DNS).
+- **NDP** (Neighbor Discovery) remplace ARP et inclut la découverte des routeurs.
 
----
+### IPv4 contre IPv6
 
-## 9. TCP et UDP : le transport
+| Critère | IPv4 | IPv6 |
+| --- | --- | --- |
+| Taille | 32 bits | 128 bits |
+| Notation | Décimale pointée | Hexadécimale avec « : » |
+| Broadcast | Oui | Non (multicast) |
+| Résolution adresse/MAC | ARP | NDP (ICMPv6) |
+| NAT | Très répandu | Inutile en principe (adresses publiques de bout en bout) |
+| Fragmentation | Par les routeurs | Par l'émetteur seulement |
+| En-tête | Taille variable, 20 octets minimum | Taille fixe de 40 octets |
 
-### 9.1 Pourquoi une couche transport ?
+Pendant la transition, on utilise la **double pile** (IPv4 et IPv6 en parallèle), des tunnels, et des mécanismes comme **NAT64 / DNS64** pour atteindre des services IPv4 depuis un réseau IPv6 seul. L'absence de NAT ne supprime pas le besoin d'un pare-feu : c'est lui qui protège, pas la traduction d'adresse.
 
-IP achemine les paquets… mais ne garantit rien : pertes, doublons, désordre possibles. Et rien ne dit **quel programme** sur la machine est destinataire. La couche transport ajoute : les **ports** (multiplexage vers les applications) et, avec TCP, la **fiabilité** (reprises, ordre, contrôle de flux).
+## 07Routage, ICMP et NAT
 
-### 9.2 Les ports : le numéro d'appartement
-
-Une IP = l'immeuble ; le **port** (16 bits, 0-65535) = l'appartement. Le couple **IP:port** identifie une conversation :
+Le **routeur** relie des réseaux différents. Pour chaque paquet, il regarde l'adresse IP de destination, cherche la **route la plus spécifique** (préfixe le plus long) dans sa table de routage et transmet au prochain saut (next hop).
 
 ```mermaid
 flowchart LR
-    subgraph APP1["app1 : 192.168.56.21"]
-        B["navigateur<br/>port source 45122"] --- K["kernel : table des sockets<br/>45122 → navigateur<br/>22 → sshd"]
-        S["sshd<br/>port 22"] --- K
-    end
-    B <-->|"conversations"| G["gitlab : 192.168.56.11<br/>SSH : port 22"]
+  PC1["PC 192.168.1.10/24passerelle .1"] --- SW1["Switch"]
+  SW1 --- R1["Routeur R1192.168.1.1 et 10.0.0.1"]
+  R1 ---|"lien 10.0.0.0/30"| R2["Routeur R210.0.0.2 et 192.168.2.1"]
+  R2 --- SW2["Switch"]
+  SW2 --- PC2["PC 192.168.2.20/24passerelle .1"]
 ```
 
-Plages de ports :
+Pour joindre 192.168.2.20, PC1 envoie à sa passerelle (R1) ; R1 consulte sa table et transmet à R2.
 
-| Plage | Nom | Exemples |
-|---|---|---|
-| 0-1023 | **Well-known** (réservés, root pour écouter) | 22 SSH, 53 DNS, 80 HTTP, 443 HTTPS |
-| 1024-49151 | Registered | 3306 MySQL, 5432 PostgreSQL, 8080 alt-HTTP |
-| 49152-65535 | Éphémères (clients) | ports sources aléatoires des conversations |
+### Lire une table de routage
 
-> [!NOTE]
-> Côté client : le système tire un **port éphémère** comme source (45122 ci-dessus) ; côté serveur : le **port well-known** connu (22, 443…). Le quad *(IP src, port src, IP dst, port dst)* identifie **une** conversation — c'est ainsi qu'un serveur web sert 10 000 clients sur un seul port 443.
+```
+Destination        Masque   Prochain saut   Interface   Origine
+192.168.1.0        /24      directement     eth0        connectée
+192.168.2.0        /24      10.0.0.2        eth1        statique ou dynamique
+0.0.0.0            /0       203.0.113.1     eth2        route par défaut (vers Internet)
+```
 
-### 9.3 TCP : la fiabilité par la conversation
+La **route par défaut** `0.0.0.0/0` sert quand rien de plus précis ne correspond. Quand plusieurs sources proposent la même destination, la **distance administrative** départage : la plus basse gagne.
 
-**TCP** (Transmission Control Protocol) = connecté, fiable, ordonné. La conversation s'ouvre par le fameux **three-way handshake** :
+### Routage statique et dynamique
+
+- **Statique** : saisi à la main. Simple, prévisible, adapté aux petits réseaux et aux routes par défaut. Ne s'adapte pas aux pannes.
+- **Dynamique** : les routeurs échangent leurs informations avec un protocole et recalculent seuls les chemins.
+
+| Protocole | Famille | Métrique / principe | Dist. admin. | Usage |
+| --- | --- | --- | --- | --- |
+| Connecté | - | Réseau directement relié | 0 | - |
+| Statique | - | Manuel | 1 | Petits réseaux, défaut |
+| eBGP | Path vector (EGP) | Chemin d'AS et politiques | 20 | Entre organisations, Internet |
+| EIGRP | Hybride (Cisco) | Bande passante et délai | 90 | Réseaux d'entreprise Cisco |
+| OSPF | État de liens (IGP) | Coût basé sur la bande passante | 110 | Standard des réseaux d'entreprise |
+| IS-IS | État de liens (IGP) | Coût | 115 | Opérateurs, datacenters |
+| RIP | Vecteur de distance | Nombre de sauts (max 15) | 120 | Obsolète, pédagogique |
+| iBGP | Path vector | Politiques internes | 200 | Au sein d'un même AS |
+
+- **IGP** (OSPF, IS-IS, EIGRP) : routage à l'intérieur d'un **système autonome** (AS).
+- **EGP** : **BGP** relie les quelque 100 000 systèmes autonomes qui forment Internet. Il choisit selon des *politiques* (contrats, coûts), pas selon la vitesse. Une erreur BGP peut couper un service entier : c'est pourquoi on déploie **RPKI** pour valider l'origine des préfixes.
+
+### TTL et ICMP
+
+Chaque paquet IP porte un compteur **TTL** (Hop Limit en IPv6) décrémenté à chaque routeur. À zéro, le paquet est détruit, ce qui évite les boucles infinies. Le routeur renvoie alors un message **ICMP** « Time Exceeded ». C'est ainsi que `traceroute` découvre le chemin : il envoie des paquets avec un TTL croissant (1, 2, 3...).
+
+| Message ICMP | Signification |
+| --- | --- |
+| Echo Request / Reply | Le `ping` |
+| Destination Unreachable | Réseau, hôte, protocole ou port injoignable |
+| Time Exceeded | TTL expiré (traceroute) |
+| Fragmentation Needed | Paquet trop gros avec le bit DF : base de la découverte du PMTU |
+
+### NAT et PAT
+
+Le **NAT** traduit des adresses privées en adresses publiques à la sortie d'un réseau. Le **PAT** (ou NAT overload), utilisé par toutes les box Internet, partage *une seule* adresse publique entre de nombreuses machines en distinguant les connexions par le numéro de port source.
+
+| Avant NAT (côté LAN) | Après NAT (côté Internet) |
+| --- | --- |
+| 192.168.1.10:51000 → 93.184.216.34:443 | 203.0.113.5:40001 → 93.184.216.34:443 |
+| 192.168.1.11:51000 → 93.184.216.34:443 | 203.0.113.5:40002 → 93.184.216.34:443 |
+
+- **SNAT** : change l'adresse source (sortie). **DNAT / redirection de port** : change l'adresse destination pour exposer un service interne.
+- Les opérateurs utilisent le **CGNAT** : plusieurs abonnés partagent une même IPv4 publique. Cela complique l'hébergement chez soi et motive IPv6.
+- Le NAT n'est pas un mécanisme de sécurité, seulement un effet de bord.
+
+## 08Transport : TCP, UDP, QUIC
+
+La couche 4 relie des **programmes** et non des machines. Elle utilise les **ports** (0 à 65 535) : une connexion est identifiée par IP source, port source, IP destination, port destination et protocole.
+
+| Plage de ports | Nom | Usage |
+| --- | --- | --- |
+| 0 à 1023 | Bien connus | Services standards (80, 443, 22...) |
+| 1024 à 49151 | Enregistrés | Applications (3306 MySQL, 5432 PostgreSQL) |
+| 49152 à 65535 | Dynamiques / éphémères | Ports source choisis par les clients |
+
+### TCP contre UDP
+
+| Critère | TCP | UDP |
+| --- | --- | --- |
+| Connexion | Oui (établissement et fermeture) | Non |
+| Fiabilité | Accusés de réception, retransmission | Aucune garantie |
+| Ordre | Garanti | Non garanti |
+| Contrôle de flux et de congestion | Oui | Non |
+| En-tête | 20 octets minimum | 8 octets |
+| Usages | Web, mail, SSH, fichiers, bases de données | DNS, DHCP, VoIP, visio, jeux, streaming, VPN WireGuard |
+
+### Établissement d'une connexion TCP
 
 ```mermaid
 sequenceDiagram
-    participant C as Client (port 45122)
-    participant S as Serveur (port 443)
-    C->>S: SYN (seq=x) "on établit ?"
-    S->>C: SYN-ACK (seq=y, ack=x+1) "ok, moi aussi"
-    C->>S: ACK (ack=y+1) "c'est parti"
-    Note over C,S: Connexion ÉTABLIE ( état ESTABLISHED )
-    C->>S: GET / (données, accusés de réception permanents)
-    S->>C: 200 OK + page
-    C->>S: FIN → S->>C: ACK → S->>C: FIN → C->>S: ACK (fermeture propre)
+  participant C as Client
+  participant S as Serveur
+  C->>S: SYN (seq = x)
+  S->>C: SYN-ACK (seq = y, ack = x+1)
+  C->>S: ACK (ack = y+1)
+  Note over C,S: Connexion établie, échange des données
+  C->>S: FIN
+  S->>C: ACK
+  S->>C: FIN
+  C->>S: ACK
+  Note over C,S: Connexion fermée
 ```
 
-Les mécanismes qui font la fiabilité :
+Poignée de main en trois temps (three-way handshake), puis fermeture en quatre messages.
 
-- **Numéros de séquence** : chaque octet numéroté → ordre garanti, pertes détectées ;
-- **ACK** : accusés de réception ; pas d'ACK dans le délai → **retransmission** ;
-- **Contrôle de flux** (fenêtre) : le récepteur annonce sa capacité — pas d'engorgement du récepteur ;
-- **Contrôle de congestion** (slow start, AIMD) : le réseau est saturé ? On ralentit — c'est ce qui évite l'effondrement d'Internet.
+### Mécanismes de TCP
 
-> [!TIP]
-> Le **handshake TCP est aussi un garde-fou de diagnostic** : `SYN` sans réponse = service down ou filtrage silencieux ; `SYN` puis `RST` = machine vivante mais port fermé ; SYN-ACK reçu = la chaîne IP+transport fonctionne. C'est exactement ce que fait `nmap` (§18).
+- **Numéros de séquence et d'acquittement** : chaque octet est numéroté, le récepteur confirme ce qu'il a reçu.
+- **Fenêtre glissante** : le récepteur annonce combien de données il peut accepter (contrôle de flux).
+- **Contrôle de congestion** : démarrage lent (slow start), puis croissance prudente, réduction à la moindre perte. Algorithmes courants : CUBIC, BBR.
+- **Retransmission** sur délai dépassé ou sur trois ACK dupliqués (fast retransmit).
+- **MSS** : taille maximale d'un segment, négociée à l'ouverture (1 460 octets pour un MTU de 1 500).
 
-### 9.4 UDP : simple et léger
+#### Drapeaux TCP
 
-**UDP** (User Datagram Protocol) = sans connexion, sans garantie, sans ordre — juste « envoie et prie ». 8 octets d'en-tête contre 20+ pour TCP.
+| Drapeau | Rôle |
+| --- | --- |
+| SYN | Ouvre la connexion, synchronise les numéros |
+| ACK | Accuse réception |
+| FIN | Ferme proprement |
+| RST | Coupe brutalement (port fermé, erreur) |
+| PSH | Demande de livrer sans attendre à l'application |
 
-| | TCP | UDP |
-|---|---|---|
-| Connexion | handshake | aucune |
-| Fiabilité | retransmissions | pertes assumées |
-| Ordre | garanti | aucun |
-| Débit/latence | overhead | minimal |
-| Usages | web, SSH, mail, transferts | **DNS (courts échanges)**, streaming, jeux, VoIP, DHCP |
+### QUIC
 
-Pourquoi DNS sur UDP ? Une requête/réponse tiennent dans un paquet : le handshake coûterait plus cher que l'échange utile. (DNS/53 passe en TCP pour les grosses réponses et les transferts de zone.)
+**QUIC** (RFC 9000) fonctionne au-dessus d'UDP et intègre le chiffrement TLS 1.3. Il établit une connexion en un aller-retour (voire zéro en reprise), évite le blocage de tête de file entre flux et survit à un changement de réseau (Wi-Fi vers 4G). C'est le transport de **HTTP/3**, déjà très répandu sur les grands sites.
 
-### 💻 Sur ton lab
+## 09DNS et DHCP
 
-```bash
-# Voir MES conversations TCP en cours (le quad en vrai)
-ss -tan | head -15
-# Colonnes : état (ESTAB/SYN-SENT/LISTEN), local IP:port, distant IP:port
+### DNS : l'annuaire d'Internet
 
-# Lister les ports EN ÉCOUTE sur app1 (la surface d'exposition)
-ss -tlnp
+Le **DNS** traduit un nom (`www.exemple.fr`) en adresse IP. C'est une base de données distribuée et hiérarchique : racine (`.`), domaines de premier niveau (`.fr`, `.com`), puis les domaines des organisations.
+
+```mermaid
+sequenceDiagram
+  participant PC as Poste
+  participant R as Résolveur (box, FAI, 1.1.1.1)
+  participant Rac as Serveurs racine
+  participant TLD as Serveurs .fr
+  participant Aut as Serveur autoritaire exemple.fr
+  PC->>R: Quelle est l'IP de www.exemple.fr ?
+  R->>Rac: www.exemple.fr ?
+  Rac-->>R: Demande aux serveurs .fr
+  R->>TLD: www.exemple.fr ?
+  TLD-->>R: Demande au serveur autoritaire
+  R->>Aut: www.exemple.fr ?
+  Aut-->>R: 93.184.216.34 (TTL 300 s)
+  R-->>PC: 93.184.216.34
+  Note over R: Réponse gardée en cache pendant le TTL
 ```
 
-### 🎯 Quiz — Transport
+Résolution récursive : le résolveur interroge la hiérarchie et met le résultat en cache.
 
-1. Pourquoi un serveur web peut-il servir des milliers de clients avec UN seul port 443 ?
-2. `SYN → rien` vs `SYN → RST` : deux diagnostics différents, lesquels ?
-3. Pourquoi DHCP est-il forcément en UDP ?
+| Enregistrement | Rôle | Exemple |
+| --- | --- | --- |
+| A | Nom vers IPv4 | www → 93.184.216.34 |
+| AAAA | Nom vers IPv6 | www → 2001:db8::1 |
+| CNAME | Alias vers un autre nom | blog → www |
+| MX | Serveurs de messagerie du domaine | 10 mail.exemple.fr |
+| NS | Serveurs de noms faisant autorité | ns1.exemple.fr |
+| TXT | Texte : SPF, DKIM, DMARC, vérifications | v=spf1 ... |
+| PTR | Résolution inverse (IP vers nom) | 34.216.184.93.in-addr.arpa |
+| SRV | Localisation d'un service (hôte et port) | \_sip.\_tcp |
+| SOA | Paramètres de la zone | Serial, durées |
+| CAA | Autorités autorisées à émettre des certificats | 0 issue "letsencrypt.org" |
 
-<details>
-<summary>✅ Réponses</summary>
+- Le DNS utilise surtout UDP/53, et TCP/53 pour les grosses réponses et les transferts de zone.
+- **DNSSEC** signe les réponses pour garantir leur authenticité. **DoT** (853) et **DoH** (443) chiffrent la requête entre le poste et le résolveur.
+- Le DNS est une cible d'attaque (empoisonnement de cache, amplification DDoS) et la cause de nombreuses pannes : « c'est toujours le DNS ».
 
-1. Chaque client a un **port éphémère distinct** : le quad (IPsrc, portsrc, IPdst, 443) est unique par conversation — le noyau démultiplexe vers le bon socket.
-2. Pas de réponse → **filtrage silencieux (DROP)** ou machine éteinte. RST → machine **vivante** mais **port fermé** (ou rejet explicite REJECT).
-3. Le client DHCP n'a **pas encore d'IP** : impossible d'établir un TCP qui exigerait des adresses valides — DHCP diffuse en broadcast UDP depuis 0.0.0.0.
-</details>
+### DHCP : la configuration automatique
 
----
+Le **DHCP** donne à une machine qui se connecte une adresse IP, un masque, une passerelle, des serveurs DNS et une durée de bail (lease). Il utilise UDP (serveur 67, client 68). Étapes, en anglais « DORA » :
 
-## 10. DNS : l'annuaire du réseau
+```mermaid
+sequenceDiagram
+  participant C as Client (sans IP)
+  participant S as Serveur DHCP
+  C->>S: DISCOVER (broadcast) : y a-t-il un serveur ?
+  S->>C: OFFER : propose 192.168.1.50
+  C->>S: REQUEST : j'accepte 192.168.1.50
+  S->>C: ACK : bail de 24 h, passerelle, DNS
+```
 
-### 10.1 Le problème
+- Le bail est renouvelé à mi-durée (T1 = 50 %).
+- Un **relais DHCP** (*ip helper*) transmet les requêtes d'un VLAN vers un serveur situé dans un autre réseau.
+- Une **réservation** associe une adresse fixe à une MAC.
+- Sans réponse, Windows et Linux s'attribuent une adresse 169.254.x.x : signe typique d'un problème DHCP.
 
-Les humains retiennent `github.com`, les machines n'acheminent que des IP. Le **DNS** (Domain Name System) traduit les noms en adresses — annuaire **distribué, hiérarchique et mis en cache**, ouvrage d'ingénierie parmi les plus robustes du monde.
+## 10Web, HTTP et TLS
 
-### 10.2 La hiérarchie et la résolution
+### Ce qui se passe quand tu tapes une adresse
 
 ```mermaid
 flowchart TB
-    R["🌐 Racine (.)<br/>13 familles de serveurs"] --> T["TLD .fr .com .org…<br/>(gérés par les registres)"]
-    T --> A["Autoritaire du domaine<br/>github.com → NS du propriétaire"]
-    A --> REC["A / AAAA / MX / TXT / CNAME…<br/>les enregistrements"]
-    style R fill:#1f6feb,color:#fff
-    style T fill:#9e6a03,color:#fff
-    style A fill:#1a7f37,color:#fff
+  A["1. Le navigateur lit l'URL : https://www.exemple.fr/page"] --> B["2. Résolution DNS : nom vers IP"]
+  B --> C["3. Route : le poste envoie vers sa passerelle (ARP si besoin)"]
+  C --> D["4. Connexion TCP (SYN, SYN-ACK, ACK) ou QUIC"]
+  D --> E["5. Négociation TLS : certificat, clés"]
+  E --> F["6. Requête HTTP : GET /page"]
+  F --> G["7. Réponse HTTP : 200 + HTML"]
+  G --> H["8. Le navigateur charge CSS, JS, images (autres requêtes)"]
 ```
 
-Quand tu résous `github.com` (première fois) :
+### HTTP
+
+HTTP est le protocole de requête et de réponse du web. Une requête comprend une **méthode**, un chemin, des en-têtes et éventuellement un corps.
+
+```
+GET /produits?id=42 HTTP/1.1
+Host: www.exemple.fr
+Accept: text/html
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+Cache-Control: max-age=3600
+```
+
+| Méthode | Usage |
+| --- | --- |
+| GET | Lire une ressource |
+| POST | Envoyer des données, créer |
+| PUT / PATCH | Remplacer / modifier |
+| DELETE | Supprimer |
+| HEAD / OPTIONS | En-têtes seuls / options autorisées (CORS) |
+
+| Code | Sens | Cause courante |
+| --- | --- | --- |
+| 200 OK | Succès | - |
+| 301 / 302 | Redirection permanente / temporaire | Changement d'URL, passage en HTTPS |
+| 304 | Non modifié | Cache valide |
+| 400 | Requête invalide | Syntaxe erronée |
+| 401 / 403 | Non authentifié / interdit | Identifiants manquants / droits insuffisants |
+| 404 | Introuvable | Mauvaise URL |
+| 429 | Trop de requêtes | Limitation de débit |
+| 500 | Erreur serveur | Bug applicatif |
+| 502 / 504 | Mauvaise passerelle / délai dépassé | Proxy ou répartiteur ne joint pas l'amont |
+| 503 | Service indisponible | Surcharge, maintenance |
+
+| Version | Transport | Apport |
+| --- | --- | --- |
+| HTTP/1.1 | TCP | Connexions persistantes, texte lisible |
+| HTTP/2 | TCP + TLS | Multiplexage de requêtes sur une connexion, compression d'en-têtes |
+| HTTP/3 | QUIC (UDP) | Plus de blocage de tête de file TCP, connexion rapide, mobilité |
+
+### TLS et HTTPS
+
+**TLS** chiffre la communication, authentifie le serveur et garantit l'intégrité. Version actuelle recommandée : **TLS 1.3** (TLS 1.0 et 1.1 sont abandonnés). L'authentification repose sur des **certificats X.509** signés par des autorités de certification (AC), selon une chaîne de confiance : certificat du site, AC intermédiaire, AC racine présente dans le navigateur.
 
 ```mermaid
 sequenceDiagram
-    participant M as Ma machine
-    participant L as Resolver local<br/>(box, 1.1.1.1, 8.8.8.8)
-    participant R as Racine
-    participant T as TLD .com
-    participant A as NS autoritaire github.com
-    M->>L: "github.com ?" (UDP 53)
-    Note over L: pas en cache → résolution récursive
-    L->>R: "github.com ?"
-    R->>L: "va voir les TLD .com" (referral)
-    L->>T: "github.com ?"
-    T->>L: "va voir les NS de github.com"
-    L->>A: "A github.com ?"
-    A->>L: "140.82.121.4"
-    Note over L: mise en cache (TTL de l'enregistrement)
-    L->>M: 140.82.121.4
+  participant C as Client
+  participant S as Serveur
+  C->>S: ClientHello : versions, suites, part d'échange de clé
+  S->>C: ServerHello + certificat + part d'échange de clé + Finished
+  Note over C,S: Clés de session calculées de chaque côté (Diffie-Hellman éphémère)
+  C->>S: Vérifie le certificat, envoie Finished
+  C->>S: Requête HTTP chiffrée
+  S->>C: Réponse HTTP chiffrée
 ```
 
-### 10.3 Les enregistrements à connaître
+Négociation TLS 1.3 : un seul aller-retour avant d'envoyer les données.
 
-| Type | Rôle | Exemple |
-|---|---|---|
-| **A** | nom → IPv4 | `gitlab 192.168.56.11` |
-| **AAAA** | nom → IPv6 | — |
-| **CNAME** | alias vers un autre nom | `www → monsite.fr` |
-| **MX** | serveurs mail du domaine (priorité) | `10 mail.mondomaine.fr` |
-| **TXT** | texte libre : SPF, DKIM, vérifications | `v=spf1 …` |
-| **NS** | serveurs de noms autoritaires | `ns1. registrar…` |
-| **PTR** | inverse : IP → nom (rDNS) | `4.121.82.140.in-addr.arpa → github.com` |
+- Le chiffrement des données utilise une clé **symétrique** (rapide, comme AES-GCM ou ChaCha20), obtenue par échange de clés **asymétrique** éphémère (confidentialité persistante).
+- Les certificats sont gratuits et automatisables (protocole ACME, Let's Encrypt) et ont des durées de validité de plus en plus courtes.
+- **HSTS** force le navigateur à n'utiliser que HTTPS. **mTLS** authentifie aussi le client (API, Zero Trust).
 
-### 10.4 Cache, TTL et le DNS du lab
+### Proxys et répartiteurs de charge
 
-Chaque réponse porte un **TTL** (durée de validité). Résolveur OS → resolver local → serveurs autoritaires : chaque niveau met en cache. Conséquences pratiques : un **changement de DNS se propage lentement** (jusqu'à expiration des TTL), et un `dig` montre de qui vient la réponse (flag `aa` = autoritaire, sinon cache).
+- **Proxy direct** : intermédiaire pour les clients d'un réseau (filtrage, cache).
+- **Reverse proxy** : devant les serveurs (Nginx, HAProxy, Envoy), il termine TLS, répartit la charge et protège.
+- **CDN** : serveurs de cache répartis dans le monde, rapprochés des utilisateurs (anycast).
+- **Load balancer L4** (répartit selon IP et port) ou **L7** (selon l'URL, les en-têtes, les cookies).
 
-Dans le lab : la phase GitLab CE ajoutera son propre DNS/masquerade — mais dès maintenant, les VMs utilisent le resolver de VirtualBox/box. Le réflexe pro : **tester la résolution séparément de la connectivité** (`dig` vs `ping`).
+## 11Autres services et ports
 
-```bash
-dig +short github.com          # réponse finale
-dig github.com                 # tout : serveur interrogé, TTL, autorité…
-dig -x 140.82.121.4            # résolution inverse (PTR)
-```
+| Service | Port | Transport | Rôle et remarque |
+| --- | --- | --- | --- |
+| FTP | 20, 21 | TCP | Transfert de fichiers en clair, à éviter |
+| SSH / SFTP / SCP | 22 | TCP | Administration à distance chiffrée, transfert de fichiers sûr |
+| Telnet | 23 | TCP | Administration en clair, obsolète |
+| SMTP | 25 / 587 / 465 | TCP | Envoi et relais de courriers (587 avec STARTTLS, 465 TLS direct) |
+| DNS | 53 | UDP/TCP | Résolution de noms |
+| DHCP | 67 / 68 | UDP | Attribution d'adresses |
+| HTTP | 80 | TCP | Web non chiffré |
+| POP3 / POP3S | 110 / 995 | TCP | Récupération du courrier (télécharge) |
+| NTP | 123 | UDP | Synchronisation de l'heure |
+| IMAP / IMAPS | 143 / 993 | TCP | Courrier synchronisé sur le serveur |
+| SNMP | 161 / 162 | UDP | Supervision (utiliser SNMPv3) |
+| LDAP / LDAPS | 389 / 636 | TCP | Annuaire (Active Directory) |
+| HTTPS | 443 | TCP (+UDP pour HTTP/3) | Web chiffré |
+| SMB | 445 | TCP | Partage de fichiers Windows, ne jamais l'exposer sur Internet |
+| Syslog | 514 | UDP/TCP | Centralisation des journaux |
+| IKE / IPsec NAT-T | 500 / 4500 | UDP | VPN IPsec |
+| OpenVPN | 1194 | UDP/TCP | VPN |
+| MySQL / PostgreSQL | 3306 / 5432 | TCP | Bases de données |
+| RDP | 3389 | TCP | Bureau à distance Windows, cible fréquente d'attaques |
+| WireGuard | 51820 | UDP | VPN moderne (port par défaut) |
 
-> [!WARNING]
-> « Ça ne marche pas » se split en deux causes totalement différentes : **résolution** (DNS : `dig` échoue) vs **connectivité** (`dig` OK mais `curl` KO). Toujours séparer les deux avant de chercher ailleurs. (§21.)
+### Messagerie
 
-### 🎯 Quiz — DNS
+L'utilisateur envoie son courrier par **SMTP** à son serveur, qui retrouve le serveur du destinataire grâce à l'enregistrement DNS **MX**, puis le dépose ; le destinataire le lit par **IMAP** (ou POP3). Contre l'usurpation d'expéditeur, trois mécanismes DNS se combinent : **SPF** (serveurs autorisés), **DKIM** (signature) et **DMARC** (politique à appliquer en cas d'échec).
 
-1. Quelle différence entre un **résolveur récursif** et un serveur **autoritaire** ?
-2. Tu viens de changer l'IP d'un enregistrement : pourquoi certains voient l'ancienne encore des heures ?
-3. Quel type d'enregistrement prouve la légitimité d'envoi d'un domaine en mail ?
+### SSH
 
-<details>
-<summary>✅ Réponses</summary>
+SSH remplace Telnet. Préfère l'authentification par **clé** au mot de passe, désactive la connexion de root directe, et utilise-le aussi pour des tunnels (`ssh -L`, `-D`) et le transfert de fichiers (`scp`, `sftp`).
 
-1. Le récursif **cherche pour vous** (descend l'arbre, met en cache) ; l'autoritaire **détient la réponse officielle** d'une zone (flag `aa`).
-2. Les résolveurs intermédiaires gardent l'ancienne valeur **jusqu'à expiration du TTL** de l'enregistrement — la propagation suit les caches, pas la config.
-3. **TXT** (SPF, et DKIM/DMARC) — les garde-fous anti-usurpation d'expéditeur.
-</details>
+### NTP
 
----
+L'heure exacte est indispensable : certificats TLS, journaux corrélables, authentification Kerberos. Les équipements réseau doivent tous se synchroniser sur les mêmes sources fiables.
 
-## 11. DHCP : qui distribue les adresses
+## 12Équipements réseau
 
-### 11.1 Le problème et la solution
+| Équipement | Couche | Fonction | Remarque |
+| --- | --- | --- | --- |
+| Répéteur / hub | 1 | Répète le signal sur tous les ports | Obsolète, un seul domaine de collision |
+| Switch L2 | 2 | Commute par adresse MAC, VLAN | Un domaine de collision par port |
+| Switch L3 | 2-3 | Commute et route entre VLAN à très haut débit | Cœur de réseau d'entreprise |
+| Routeur | 3 | Relie des réseaux, routage, NAT | Sépare les domaines de broadcast |
+| Point d'accès Wi-Fi (AP) | 1-2 | Fait le pont entre Wi-Fi et Ethernet | Géré par un contrôleur ou le cloud |
+| Pare-feu | 3-7 | Filtre le trafic selon des règles | Voir chapitre 14 |
+| Load balancer | 4-7 | Répartit les requêtes entre serveurs | Vérifie l'état de santé des serveurs |
+| Proxy / reverse proxy | 7 | Intermédiaire applicatif | Cache, filtrage, terminaison TLS |
+| Modem / ONT | 1 | Adapte le signal de l'opérateur (ADSL, fibre FTTH, câble) | L'ONT termine la fibre optique |
+| IDS / IPS | 3-7 | Détecte / bloque les attaques | Souvent intégré au pare-feu |
+| Box Internet | 1-7 | Routeur, switch, Wi-Fi, DHCP, DNS, NAT et pare-feu dans un seul boîtier | Équipement domestique tout-en-un |
 
-Attribuer à la main IP/masque/passerelle/DNS sur chaque machine = ingérable. **DHCP** (Dynamic Host Configuration Protocol) distribue automatiquement un **bail** (lease) : IP, masque, passerelle, DNS, durée.
+| Appareil | Domaines de collision | Domaines de broadcast |
+| --- | --- | --- |
+| Hub | 1 pour tous les ports | 1 |
+| Switch | 1 par port | 1 par VLAN |
+| Routeur | 1 par interface | 1 par interface |
 
-### 11.2 Le processus DORA
+## 13Wi-Fi et réseaux mobiles
 
-```mermaid
-sequenceDiagram
-    participant C as Client (sans IP)
-    participant S as Serveur DHCP
-    C->>S: DISCOVER (broadcast 255.255.255.255, src 0.0.0.0)
-    S->>C: OFFER "je te propose 192.168.56.30"
-    C->>S: REQUEST "je prends 192.168.56.30"
-    S->>C: ACK "c'est à toi pour 24 h" (bail)
-    Note over C: Machine configurée !
-```
+### Les standards Wi-Fi (IEEE 802.11)
 
-Tout se fait en **broadcast UDP** (le client n'a ni IP ni connaissance du serveur). Sur un réseau segmenté, un **DHCP relay** transmet les broadcasts vers le serveur central.
+| Nom commercial | Norme | Bandes | Débit théorique max. | Points clés |
+| --- | --- | --- | --- | --- |
+| Wi-Fi 4 | 802.11n | 2,4 et 5 GHz | 600 Mb/s | MIMO |
+| Wi-Fi 5 | 802.11ac | 5 GHz | 6,9 Gb/s | Canaux 80/160 MHz, MU-MIMO descendant |
+| Wi-Fi 6 / 6E | 802.11ax | 2,4, 5 (et 6 GHz pour 6E) | 9,6 Gb/s | OFDMA, efficace en environnement dense |
+| Wi-Fi 7 | 802.11be | 2,4, 5 et 6 GHz | 46 Gb/s | Canaux 320 MHz, 4096-QAM, Multi-Link Operation (MLO) |
 
-Le bail se renouvelle à mi-vie ; expiration → la machine rend l'IP (et retombe en APIPA si plus de serveur — le lien avec §6.5 !).
+Le Wi-Fi 7 se déploie depuis 2024 ; la norme suivante (802.11bn, orientée fiabilité) est en cours d'élaboration. Les débits réels sont bien inférieurs aux valeurs théoriques : compte une fraction de ce chiffre, partagée entre tous les appareils d'une même cellule.
 
-### 11.3 DHCP statique : le bon compromis du lab
+### Bandes de fréquences
 
-Dans le lab, on veut des IP **fixes** (les playbooks Ansible ciblent des adresses) sans tout configurer à la main : **réservation DHCP** = le serveur attribue **toujours la même IP à une MAC donnée**. Alternative : adresses statiques dans la config réseau — mais la réservation centralise tout dans le DHCP.
+| Bande | Portée et traversée des murs | Débit | Encombrement |
+| --- | --- | --- | --- |
+| 2,4 GHz | La meilleure | Faible | Fort (Bluetooth, micro-ondes). Seulement 3 canaux sans recouvrement : 1, 6, 11 |
+| 5 GHz | Moyenne | Élevé | Moyen, nombreux canaux (certains partagés avec les radars, règle DFS) |
+| 6 GHz | Plus courte | Très élevé | Faible, canaux larges, WPA3 obligatoire |
 
-> [!WARNING]
-> **Deux serveurs DHCP actifs sur le même réseau = bombe à retardement** (réponses concurrentes, bails incohérents). Si des machines du lab prennent des IP inattendues, soupçonner un second DHCP (une VM mal configurée, par exemple) — le diagnostic s'appelle *rogue DHCP*.
+### Notions essentielles
 
-### 💻 Sur ton lab
+- **SSID** : nom du réseau. **BSSID** : adresse MAC de la radio de l'AP. **ESS** : plusieurs AP qui partagent un SSID.
+- **CSMA/CA** : on écoute avant d'émettre, car on ne peut pas détecter les collisions en radio. Le Wi-Fi est **half-duplex** et partagé : plus il y a d'appareils actifs, moins chacun a de débit.
+- **Roaming** : passer d'un AP à un autre sans coupure (standards 802.11k, v, r).
+- **Mesh** : AP qui se relaient entre eux. Le câblage Ethernet entre bornes (backhaul filaire) est toujours préférable.
+- **Site survey** : étude de couverture et de capacité avant le déploiement.
 
-```bash
-# Qui m'a donné mon bail et quand expire-t-il ?
-journalctl -u systemd-networkd | grep -i dhcp | tail -5   # selon distro
-nmcli dev show enp0s3 | grep -E 'DNS|GATEWAY'             # ce que DHCP a poussé
-```
+### Sécurité Wi-Fi
 
-### 🎯 Quiz — DHCP
+| Protocole | État | Remarque |
+| --- | --- | --- |
+| WEP | Cassé | Ne jamais utiliser |
+| WPA / TKIP | Obsolète | Faible |
+| WPA2-Personnel (PSK, AES-CCMP) | Encore courant | Mot de passe partagé, sensible aux attaques par dictionnaire hors ligne |
+| WPA3-Personnel (SAE) | Recommandé | Résiste aux dictionnaires hors ligne, confidentialité persistante |
+| WPA2/WPA3-Entreprise (802.1X, EAP) | Référence en entreprise | Identifiants individuels via un serveur RADIUS |
+| Wi-Fi Enhanced Open (OWE) | Réseaux ouverts | Chiffre sans mot de passe |
 
-1. Quels 4 éléments minimum un bail DHCP transmet-il ?
-2. Pourquoi le DISCOVER est-il broadcast et non unicast ?
-3. Une machine affiche 169.254.x.x : quel lien avec DHCP ?
+Désactive le WPS, utilise une phrase de passe longue, sépare un SSID « invités » dans un VLAN isolé, et mets à jour le micrologiciel des bornes.
 
-<details>
-<summary>✅ Réponses</summary>
+### Réseaux mobiles
 
-1. **IP + masque + passerelle + DNS** (+ domaines, NTP, durées…).
-2. Le client n'a **aucune IP ni adresse du serveur** : seule la diffusion peut toucher « le » serveur, quel qu'il soit.
-3. DHCP **échoué** : après plusieurs essais, la machine s'auto-attribue une APIPA (link-local). Voir §6.5 et §21.
-</details>
+| Génération | Technologie | Débit indicatif | Apport |
+| --- | --- | --- | --- |
+| 2G | GSM | quelques dizaines de kb/s | Voix numérique, SMS |
+| 3G | UMTS / HSPA | jusqu'à quelques Mb/s | Internet mobile |
+| 4G | LTE | dizaines à centaines de Mb/s | Tout IP, voix sur IP (VoLTE) |
+| 5G | NR (New Radio) | centaines de Mb/s à plusieurs Gb/s | Faible latence, forte densité, network slicing, versions « standalone » avec cœur 5G natif |
 
----
+Autres technologies sans fil : **Bluetooth** et **BLE** (courte portée), **Zigbee, Thread, Matter** (domotique), **LoRaWAN** et **NB-IoT** (objets connectés longue portée, faible débit), **NFC** (quelques centimètres).
 
-## 12. NAT : partager une seule adresse publique
+## 14Sécurité réseau
 
-### 12.1 Le problème : pénurie d'IPv4
+### Les objectifs : le triangle CIA
 
-4,3 milliards d'adresses IPv4 pour des dizaines de milliards d'appareils. Solution mondiale provisoire (depuis 1994 !) : le **NAT** (Network Address Translation) — un monde intérieur d'adresses privées (RFC 1918, §6.5) qui sortent toutes sous **une** (ou quelques) adresse(s) publique(s).
+- **Confidentialité** : seuls les autorisés lisent (chiffrement, contrôle d'accès).
+- **Intégrité** : les données ne sont pas modifiées (hachage, signatures).
+- **Disponibilité** : le service reste accessible (redondance, anti-DDoS, sauvegardes).
 
-### 12.2 Comment ça marche : la table de traduction
+S'y ajoutent l'**authentification** (qui es-tu ?), l'**autorisation** (que peux-tu faire ?) et la **traçabilité** (journaux). Principes directeurs : **défense en profondeur** (plusieurs barrières successives), **moindre privilège** et **segmentation**.
 
-```mermaid
-sequenceDiagram
-    participant A as app1<br/>10.0.2.15:45122
-    participant N as NAT (passerelle)<br/>publique: 93.24.x.x
-    participant W as Serveur web<br/>140.82.121.4:443
-    A->>N: src 10.0.2.15:45122 → dst 140.82.121.4:443
-    Note over N: je réécris la source :<br/>10.0.2.15:45122 → 93.24.x.x:40001<br/>et je note le couple dans ma table
-    N->>W: src 93.24.x.x:40001 → dst 140.82.121.4:443
-    W->>N: dst 93.24.x.x:40001 (réponse)
-    Note over N: table : 40001 ↔ 10.0.2.15:45122 → je réécris la destination
-    N->>A: dst 10.0.2.15:45122
-```
+### Principales attaques et parades
 
-Le NAT fonctionne parce que les **ports** rendent chaque conversation **unique** (§9) : 65 535 conversations possibles derrière une seule IP publique. C'est du **NAPT/PAT** (« NAT overload »), le NAT que tout le monde pratique sans le savoir.
+| Attaque | Principe | Parades |
+| --- | --- | --- |
+| Sniffing | Écouter le trafic non chiffré | TLS, VPN, switchs plutôt que hubs, 802.1X |
+| ARP spoofing / MITM | Se faire passer pour la passerelle sur le LAN | Dynamic ARP Inspection, segmentation, chiffrement de bout en bout |
+| Faux serveur DHCP | Distribuer de fausses passerelles ou DNS | DHCP snooping |
+| VLAN hopping | Sauter d'un VLAN à l'autre (double étiquetage, négociation de trunk) | Désactiver DTP, VLAN natif inutilisé, ports en accès fixe |
+| MAC flooding | Saturer la table CAM pour que le switch inonde | Port security |
+| Empoisonnement DNS | Falsifier une réponse DNS | DNSSEC, DoT / DoH, résolveurs à jour |
+| DoS / DDoS | Saturer un service (volumétrique, SYN flood, amplification) | Filtrage en amont, CDN anti-DDoS, SYN cookies, limitation de débit |
+| Balayage de ports | Chercher des services ouverts | Pare-feu, fermer les ports inutiles, IDS |
+| Hameçonnage | Tromper l'utilisateur | Formation, SPF/DKIM/DMARC, MFA, passkeys |
+| Rançongiciel et mouvement latéral | Chiffrer et se propager de machine en machine | Segmentation, sauvegardes hors ligne, EDR, moindre privilège |
+| Point d'accès pirate (evil twin) | Faux Wi-Fi imitant le vrai | 802.1X avec validation du certificat, WIPS, VPN |
+| Détournement BGP | Annoncer des préfixes qui ne sont pas les siens | RPKI, filtrage des annonces |
 
-**Conséquences conceptuelles (niveau ingénieur)** :
-- le NAT **casse le modèle de bout en bout** : l'initiateur doit être **depuis l'intérieur** ; l'extérieur ne peut pas « entrer » sans règle spéciale (**port forwarding / DNAT**) ;
-- il rend l'intérieur **invisible** (effet de sécurité par masquage, mais **pas** un pare-feu) ;
-- il complique certains protocoles qui embarquent des IP dans leurs données (FTP actif, SIP) — d'où les « NAT helpers » et la préférence moderne pour TLS/QUIC.
+### Pare-feu
 
-### 12.3 Le NAT dans ta vie, tous les niveaux
+| Génération | Ce qu'il examine |
+| --- | --- |
+| Filtre de paquets (ACL) | IP, protocole, port, paquet par paquet, sans mémoire |
+| Stateful | Suit l'état des connexions : le retour d'un flux autorisé passe automatiquement |
+| NGFW (nouvelle génération) | Applications, utilisateurs, IPS intégré, inspection TLS, filtrage d'URL, réputation |
+| WAF | Spécialisé pour le web (injection SQL, XSS) |
 
-| Niveau | Qui NATte | Exemple |
-|---|---|---|
-| **VirtualBox NAT** | le moteur VirtualBox | tes VMs (10.0.2.15) sortent via l'IP du poste |
-| **Box domestique** | ton routeur WiFi | tous tes appareils sortent sous l'IP publique du FAI |
-| **CGNAT** | l'opérateur | des dizaines d'abonnés derrière UNE IP publique |
-| **Entreprise** | pare-feu de bordure | sorties contrôlées et journalisées |
-
-Ton paquet vers GitHub traverse **les trois** premiers niveaux — d'où l'intérêt de `traceroute` (§8.3) qui les montre.
-
-### 💻 Sur ton lab
-
-```bash
-# Sur app1 : je vois MA source privée, mais le serveur distant voit autre chose
-curl -s https://api.ipify.org && echo   # → l'IP PUBLIQUE de ta box, pas 10.0.2.15 !
-ip route get 1.1.1.1                     # → via 10.0.2.2 : le NAT VirtualBox est le 1er traducteur
-```
-
-### 🎯 Quiz — NAT
-
-1. Pourquoi le NAT est-il indispensable au bon fonctionnement des ports ?
-2. Un collègue doit accéder depuis Internet à un service interne (192.168.56.11:443) : quelle règle NAT, et quelle réflexion sécurité avant ?
-3. Le NAT est-il une mesure de sécurité suffisante ? Pourquoi ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Il traduit IP **et ports** (PAT) : c'est le port source unique de chaque conversation qui permet de démêler les réponses et de partager une IP publique entre des milliers de flux.
-2. Une règle **DNAT/port forwarding** : IP_publique:443 → 192.168.56.11:443. Réflexion sécurité : exposer publiquement un GitLab impose TLS, auth forte, mises à jour, restriction par IP source si possible — idéalement passer par un VPN (§17) plutôt qu'ouvrir.
-3. **Non** : il masque l'intérieur mais ne filtre ni ne détecte rien ; dès qu'une règle DNAT existe, la machine est exposée. Le NAT est un mécanisme d'économie d'adresses, pas un pare-feu (§16).
-</details>
-
----
-
----
-
-## 13. Applications : HTTP/HTTPS et le chemin complet d'une requête
-
-### 13.1 HTTP : le protocole du web
-
-**HTTP** (HyperText Transfer Protocol) repose sur le modèle requête/réponse :
+Règles d'or : **refuser par défaut**, n'autoriser que le nécessaire, de la manière la plus précise possible, et documenter chaque règle. Les règles s'évaluent *dans l'ordre* : la première correspondance s'applique.
 
 ```
-Requête                              Réponse
-─────────                            ───────
-GET /index.html HTTP/1.1             HTTP/1.1 200 OK
-Host: gitlab.mondomaine.fr           Content-Type: text/html
-User-Agent: curl/8.5.0               Content-Length: 5120
-Accept: text/html                    <html>… (corps)
+#  Source          Destination     Service   Action
+1  Internet        Serveur web     TCP/443   Autoriser
+2  LAN utilisateurs Internet       TCP/80,443, UDP/53   Autoriser
+3  LAN utilisateurs DMZ            TCP/443   Autoriser
+4  Tout            Tout            Tout      Refuser et journaliser
 ```
 
-Méthodes principales : **GET** (lire), **POST** (créer/envoyer), **PUT** (remplacer), **PATCH** (modifier partiellement), **DELETE** (supprimer), **HEAD** (en-têtes seulement). Codes de réponse : **2xx** succès, **3xx** redirection, **4xx** faute du client (404 introuvable, 403 interdit, 401 non authentifié), **5xx** faute du serveur (500, 502/503 = souvent le reverse-proxy qui ne joint pas le backend — réflexe DevOps !).
+### VPN
 
-- **HTTP/1.1** : une requête à la fois par connexion (pipelining limité) ;
-- **HTTP/2** : multiplexé (plusieurs flux dans une connexion), compression d'en-têtes ;
-- **HTTP/3** : sur **QUIC** (au-dessus d'UDP) — handshake plus rapide, résiste aux changements de réseau (mobile).
-
-### 13.2 HTTPS = HTTP + TLS
-
-**TLS** (Transport Layer Security) chiffre et authentifie la connexion. Le handshake simplifié :
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant S as Serveur (gitlab)
-    C->>S: ClientHello (versions, suites chiffrées, SNI)
-    S->>C: ServerHello + CERTIFICAT (chaîne de confiance)
-    C->>C: Vérif : signé par une CA de confiance ? nom = gitlab… ? non expiré ?
-    Note over C,S: Échange de clés (ECDHE) → secret partagé
-    C->>S: Finished (session chiffrée)
-    S->>C: Finished
-    Note over C,S: Toute la suite est CHIFFRÉE (AES…) + intègre (MAC)
-```
-
-Trois garanties : **confidentialité** (chiffrement), **intégrité** (détection de modification), **authenticité du serveur** (certificat validé par une CA — c'est la chaîne de confiance de ton navigateur/OS). **SNI** (Server Name Indication) : le client annonce le nom visé en clair dans le hello (permet l'hébergement mutualisé ; existe en version chiffrée ECH).
-
-> [!IMPORTANT]
-> Certificats du lab : autosignés = avertissements, acceptable en local mais pas une habitude à prendre. La voie pro : une **CA interne** (ex. `step-ca`, smallstep) dont on installe le certificat racine sur les VMs — tout le TLS interne devient valide, réflexe d'entreprise.
-
-### 13.3 Le chemin complet : « apt update » sur app1, décomposé
-
-Assemblage final — que se passe-t-il entre la commande et la réponse ? C'est le **cours entier en une séquence** :
-
-```mermaid
-sequenceDiagram
-    participant U as apt (app1)
-    participant D as DNS (resolver)
-    participant K as Noyau app1
-    participant G as NAT VirtualBox (10.0.2.2)
-    participant W as Serveur miroir Debian (Internet)
-
-    U->>D: "deb.debian.org ?" (DNS UDP 53)
-    D-->>U: IP du miroir (cache/hiérarchie §10)
-    U->>K: TCP connect miroir:80
-    K->>K: 1. locale ou distante ? (ET logique §6.2)
-    K->>K: 2. distante → route default via 10.0.2.2 (§7)
-    K->>K: 3. ARP : MAC de 10.0.2.2 ? (§5)
-    K->>G: SYN — trame(MAC VM→MAC NAT) / paquet(10.0.2.15→miroir) / TCP SYN (§9)
-    G->>W: NAT : src devient IP-publique:40001 (§12)
-    W-->>G: SYN-ACK → table NAT → retour à app1
-    K-->>U: ESTABLISHED
-    U->>W: HTTP GET /dists/... (via TLS si https)
-    W-->>U: 200 OK + fichiers d'index
-    Note over U,W: Chaque saut intermédiaire : TTL-1, trame réécrite, paquet intact (§8)
-```
-
-Le même déroulé vaut pour `git clone` (SSH/443 vers gitlab), un appel API, une télémétrie Prometheus. **Diagnostiquer un réseau = savoir sur quelle flèche de ce diagramme le déroulé s'arrête.** C'est l'objet du §21.
-
-### 🎯 Quiz — Applications
-
-1. Un `curl` renvoie **502 Bad Gateway** : le DNS et le réseau fonctionnent. Quelle hypothèse prioritaire ?
-2. Pourquoi le certificat d'un serveur interne autosigné déclenche-t-il une alerte, et quelle solution propre ?
-3. Dans la séquence 13.3, où les IP sources changent-elles ? Où les MAC ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Le **reverse-proxy joignant le backend** : le proxy répond (il est vivant), mais l'application derrière ne répond pas/plus — vérifier le service upstream, son port, sa santé.
-2. Le client ne peut pas rattacher le certificat à une **CA de confiance**. Solution : CA interne dont le certificat racine est déployé sur les clients (§13.2), pas l'habitude d'accepter les exceptions.
-3. IP : **uniquement dans la table NAT** (G). MAC : **à chaque saut** (ici : app1→NAT puis NAT→box, etc.).
-</details>
-
----
-
-## 14. Wi-Fi : la couche 2 sans fil
-
-### 14.1 Ce qui change par rapport au fil
-
-Le Wi-Fi (802.11) réutilise le modèle : MAC, trames, broadcast — mais le support radio impose des solutions spécifiques :
-
-- **CSMA/CA** : on écoute avant d'émettre et on attend un délai aléatoire (**collision avoidance**, pas détection comme en fil — on ne peut pas écouter et parler en même temps en radio) ;
-- **Le signal n'a pas de frontière** : impossible de « câbler proprement » jusqu'au switch ; tout flotte dans l'air → d'où le chiffrement obligatoire ;
-- **BSSID/SSID** : le SSID est le nom du réseau ; le BSSID, l'adresse MAC du point d'accès ; un AP peut servir plusieurs SSID (mappés sur des VLAN — §19) ;
-- **Itinérance (roaming)** : plusieurs AP au même SSID, le terminal bascule — d'où les contrôleurs/protocoles 802.11k/v/r en entreprise.
-
-### 14.2 Sécurité Wi-Fi : WEP → WPA2 → WPA3
-
-| Norme | État | Pourquoi |
-|---|---|---|
-| WEP | ☠️ mort (craqué en minutes) | clé statique, RC4 cassé |
-| WPA | obsolète | patch transitoire |
-| **WPA2-PSK** | courant chez les particuliers | AES solide, mais **clé partagée** : qui a la clé a le réseau |
-| **WPA2-Entreprise (802.1X)** | standard pro | chaque utilisateur s'authentifie individuellement (RADIUS) |
-| **WPA3-SAE** | moderne | protège contre les attaques hors-ligne sur la passphrase |
-
-> [!IMPORTANT]
-> En entreprise : **jamais de PSK partagé** pour les usagers — 802.1X (identifiants individuels, révocation par personne, traçabilité). Le portail captif n'est pas une authentification, c'est un panneau d'affichage.
-
-### 14.3 Le Wi-Fi dans l'ingénierie réseau
-
-Un AP = un hub radio déguisé en switch : **le médium est partagé** — tous les clients d'un même canal/cellule se partagent le débit. Dimensionner un Wi-Fi d'entreprise, c'est compter les **cellules** (AP), leurs canaux (sans chevauchement 1/6/11 en 2,4 GHz), la puissance et l'atténuation des murs. La « fibre dans le mur » ne remplace pas une étude radio.
-
-### 🎯 Quiz — Wi-Fi
-
-1. Pourquoi dit-on que le Wi-Fi est un « hub déguisé » au niveau médium ?
-2. WPA2-PSK vs WPA2-Entreprise : la différence structurelle ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Tous les clients d'une cellule **partagent le même médium radio** : un seul parle à la fois (CSMA/CA), le débit se divise — comme l'ancien hub coaxial.
-2. PSK = **une clé pour tous** (compromise = tout est perdu, aucune traçabilité) ; Entreprise = **802.1X/RADIUS** : identifiants individuels, révocables, journalisés.
-</details>
-
----
-
-## 15. IPv6 : le futur déjà là
-
-### 15.1 Pourquoi IPv6 existe
-
-IPv4 = 4,3 milliards d'adresses : épuisé depuis 2011 (les pools régionaux sont vides — d'où CGNAT partout, §12). **IPv6 = 128 bits** : 340 undécillions d'adresses — chaque grain de sable en aurait des milliards. Déployé massivement (Google mesure ~45 % de son trafic en IPv6, mobile en tête).
-
-### 15.2 La notation
-
-128 bits notés en **8 groupes hexadécimaux** séparés par `:` avec des règles de compression :
-
-```
-complet  : 2001:0db8:0000:0000:0000:8a2e:0370:7334
-compressé: 2001:db8::8a2e:370:7334      ← :: = groupes de zéros (UNE seule fois)
-```
-
-Structure d'une adresse globale :
-
-```
-2001:0db8:1234:5678:0000:0000:0000:0001
-└────┬────┘└──┬──┘└──────────┬─────────┘
-  préfixe   sous-réseau   identifiant interface (64 bits)
-  global    (RIR/FAI/soi)  ← souvent dérivé de la MAC (EUI-64) ou aléatoire
-```
-
-- **Préfixe standard** : un LAN reçoit un **/64** (toujours 64 bits d'interface) ; une entreprise typique : /48 → 65 536 sous-réseaux. **Fini la pénurie et le subnetting d'entretien** : on n'économise plus les adresses, on segmente largement ;
-- **Link-local** `fe80::/10` : auto-configurée sur chaque interface, jamais routée (voisins, OSPF…) ;
-- **ULA** `fd00::/8` : l'équivalent des RFC 1918 (privé) ;
-- Plus de broadcast : **multicast** (ff02::1 = tous les nœuds du lien) et **anycast** ;
-- **SLAAC** : auto-configuration sans serveur (le routeur annonce le préfixe, la machine se construit son adresse) — en complément de DHCPv6 ;
-- **NDP** remplace ARP (résolution voisins via ICMPv6) ;
-- La boucle : `::1`.
-
-### 15.3 Dual-stack : la réalité de 2026
-
-Presque partout on tourne en **double pile** : IPv4 + IPv6 simultanés, IPv6 préféré s'il est joignable. Dans le lab VirtualBox, les VMs ont par défaut une link-local IPv6 sur chaque interface — tu peux déjà l'observer.
-
-> [!TIP]
-> La compétence 2026 n'est pas « migrer tout en IPv6 » mais **bilinguisme** : lire une table de routage v6, comprendre qu'un service n'écoute que sur `::` (donc joignable en v6) et diagnostiquer « pourquoi ça passe en v4 mais pas v6 » (ou l'inverse). Beaucoup d'incidents « réseau » modernes sont des demi-piles mal appariées.
-
-### 💻 Sur ton lab
-
-```bash
-ip -6 addr show        # ta link-local fe80::… déjà là
-ip -6 route            # fe80::/10 dev … (la route "voisins")
-ping -6 -c1 fe80::1%enp0s3   # ping v6 vers la passerelle du lien (si présente)
-```
-
-### 🎯 Quiz — IPv6
-
-1. Pourquoi n'y a-t-il plus de « calcul de subnetting » d'entretien en IPv6 ?
-2. ::1, fe80::/10, fd00::/8, ff02::1 : à quoi chacun sert-il ?
-3. Quelle est la vraie compétence IPv6 de 2026 ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Convention standard : **/64 par segment, /48 par site** — les frontières sont fixées, on ne bricole plus les bits (on segmente par sous-réseaux entiers).
-2. `::1` loopback ; `fe80::/10` link-local (non routée) ; `fd00::/8` ULA privé ; `ff02::1` multicast de lien (remplace le broadcast).
-3. Le **bilinguisme opérationnel** : diagnostiquer les interactions dual-stack (service qui n'écoute qu'en v6, DNS avec ou sans AAAA, préférence de source…).
-</details>
-
----
-
----
-
-## 16. Sécurité réseau : firewalls, filtrage, segmentation
-
-### 16.1 La doctrine : défense en profondeur
-
-Aucun mécanisme unique ne suffit. Le modèle d'ingénieur : **couches de contrôles** — segmentation (limiter le rayon d'action), filtrage (autorisations explicites), chiffrement (confidentialité même en cas d'interception), supervision (détecter), le tout sous une posture *zero-trust* : *never trust, always verify* — le fait d'être « sur le LAN interne » ne vaut plus autorisation.
-
-### 16.2 Le pare-feu : filtrer les flux
-
-Un **pare-feu** applique des règles aux paquets/connexions. Deux grandes familles :
-
-- **Filtrage sans état** : chaque paquet jugé isolément (ACL de routeur) ;
-- **Filtrage à état** (le standard) : le pare-feu suit les **connexions** — si un flux sorti est autorisé, ses réponses rentrent automatiquement (table d'états). C'est ce que fait **nftables/iptables** sur tes VMs.
-
-Le modèle de règles de référence (chez soi comme en prod) :
-
-```
-# Politique par défaut : TOUT INTERDIRE, puis n'autoriser que le nécessaire
-# (least privilege réseau — le même réflexe que pour les permissions fichiers)
-
-1. Autoriser établies/related          (les réponses des flux sortants)
-2. Autoriser loopback                  (127.0.0.1 doit toujours fonctionner)
-3. Autoriser SSH depuis l'admin UNIQUEMENT   (192.168.56.10 → :22)
-4. Autoriser 443 vers gitlab depuis le LAN
-5. Tout le reste : DROP (et journaliser)
-```
-
-> [!IMPORTANT]
-> **Défaut = refus**. Une règle « autoriser » qui manque se voit vite (le service ne marche pas). Un filtrage « tout autoriser sauf… » échoue silencieusement (personne ne connaît la liste complète de ce qu'il fallait interdire).
-
-### 16.3 Zone de confiance : DMZ et segmentation
+Un **VPN** crée un tunnel chiffré à travers un réseau non sûr.
 
 ```mermaid
 flowchart LR
-    IN["🌐 Internet"] --> FW1["🛡️ Pare-feu bordure"]
-    FW1 --> DMZ["Zone DMZ<br/>(services exposés : reverse-proxy, mail)"]
-    FW1 --> LAN["LAN interne<br/>(postes, serveurs internes)"]
-    DMZ -.->|"seulement ports métier"| FW2["🛡️ Filtrage interne"]
-    FW2 --> INT["gitlab, BDD, monitoring"]
-    style DMZ fill:#9e6a03,color:#fff
-    style LAN fill:#1a7f37,color:#fff
+  subgraph SA["Site A"]
+    LA["Réseau 10.1.0.0/16"] --- GA["Passerelle VPN A"]
+  end
+  subgraph SB["Site B"]
+    LB["Réseau 10.2.0.0/16"] --- GB["Passerelle VPN B"]
+  end
+  GA ===|"Tunnel chiffré à travers Internet"| GB
+  N["Télétravailleurclient VPN"] -.->|"accès distant"| GA
 ```
 
-Principes : ce qui est **exposé** vit en DMZ, compromettable sans prendre l'intérieur ; l'intérieur n'accepte du DMZ **que les flux métier** ; le transit s'observe et se journalise. Dans le lab : le host-only joue le rôle d'« interne » ; ajouter un troisième réseau « DMZ » pour le futur reverse-proxy Traefik (phase 5) serait l'exercice parfait.
+| Technologie | Usage | Remarque |
+| --- | --- | --- |
+| IPsec (IKEv2) | Site à site, accès distant | Standard universel, plus complexe |
+| WireGuard | Site à site, accès distant, mesh | Moderne, très léger, code court et facile à auditer |
+| OpenVPN | Accès distant | Très répandu, flexible |
+| VPN SSL / TLS d'appliance | Accès distant | Passe par les pare-feu, surveille bien les mises à jour : cible fréquente |
 
-### 16.4 Les attaques LAN classiques (et leurs défenses)
+Un VPN de site à site relie deux réseaux, un VPN d'accès distant relie un poste à un réseau. *Full tunnel* envoie tout le trafic dans le VPN, *split tunnel* seulement celui destiné à l'entreprise.
 
-| Attaque | Principe | Défenses |
-|---|---|---|
-| **ARP spoofing / MITM** | usurper la passerelle en ARP (§5.3) | DAI, chiffrement de bout en bout |
-| **MAC flooding** | saturer la table CAM pour forcer le hub-mode | port security, limites de MAC |
-| **DHCP rogue** | faux serveur DHCP (§11.3) | DHCP snooping |
-| **Scan de ports** | cartographier les services (§9.3, nmap) | réduire la surface (§22), tarpit/rate-limit |
-| **DoS/DDoS** | saturer une ressource | filtrage amont, rate limiting, CDN |
+### Segmentation, DMZ et contrôle d'accès
 
-### 16.5 Pare-feu local : nftables sur tes VMs
+- **DMZ** : zone intermédiaire qui héberge les services exposés (web, mail), isolée du réseau interne. Si un serveur est compromis, l'attaquant n'accède pas directement au LAN.
+- **Micro-segmentation** : règles fines entre charges de travail, surtout en datacenter et cloud.
+- **802.1X / NAC** : un appareil doit s'authentifier avant d'obtenir l'accès au port ou au Wi-Fi, via un serveur **RADIUS**.
+- **AAA** : Authentication, Authorization, Accounting (RADIUS, TACACS+ pour l'administration des équipements).
+- **IDS / IPS** : détection (alerte) et prévention (blocage) selon des signatures ou des anomalies.
+- **SIEM** : collecte et corrèle les journaux de tous les équipements.
 
-Chaque VM doit se défendre **elle-même** (host firewall) — c'est le dernier rempart quand tout le reste a été traversé. Sous Linux moderne : **nftables** (successeur d'iptables).
+### Zero Trust
 
-```bash
-# Exemple minimal pour app1 : SSH depuis bastion + établies, reste en drop
-sudo nft add table inet filter
-sudo nft add chain inet filter input '{ type filter hook input priority 0 ; policy drop ; }'
-sudo nft add rule inet filter input iif lo accept
-sudo nft add rule inet filter input ct state established,related accept
-sudo nft add rule inet filter input tcp dport 22 ip saddr 192.168.56.10 accept
-sudo nft list ruleset
+Le modèle classique « château fort » fait confiance à tout ce qui est à l'intérieur. Le **Zero Trust** part du principe inverse : aucune confiance implicite, chaque accès est vérifié selon l'identité, l'état du poste et le contexte, avec des droits minimaux. Il s'appuie sur l'authentification multifacteur (de préférence résistante à l'hameçonnage : passkeys, clés FIDO2), la micro-segmentation et l'accès par application (ZTNA) plutôt que par réseau complet. Les offres **SASE** regroupent SD-WAN et sécurité dans le cloud.
+
+Bonnes pratiques de base
+
+- Change les mots de passe par défaut, active MFA partout où c'est possible.
+- Mets à jour systèmes et micrologiciels : la plupart des intrusions exploitent des failles connues.
+- Désactive les services et ports inutiles (Telnet, SMBv1, WPS).
+- Utilise SSH et HTTPS, jamais leurs équivalents en clair.
+- Sépare les réseaux : utilisateurs, serveurs, invités, IoT, administration.
+- Sauvegarde selon la règle 3-2-1 et teste la restauration.
+- Centralise et surveille les journaux.
+
+## 15Architecture de réseau
+
+### Modèle hiérarchique à trois niveaux
+
+Pour un campus ou un siège, on sépare trois rôles : **accès** (les prises et le Wi-Fi), **distribution** (agrégation, politiques, routage inter-VLAN) et **cœur** (transport rapide). Dans les sites moyens, on fusionne distribution et cœur : c'est le « cœur réduit » à deux niveaux.
+
+```mermaid
+flowchart TB
+  I["Internet"] --- FW["Pare-feu"]
+  FW --- DMZ["DMZ : web, mail, reverse proxy"]
+  FW --- C1["Cœur A"]
+  FW --- C2["Cœur B"]
+  C1 --- C2
+  C1 --- D1["Distribution 1"]
+  C2 --- D1
+  C1 --- D2["Distribution 2"]
+  C2 --- D2
+  D1 --- A1["Accès étage 1 : PC, AP, téléphones"]
+  D1 --- A2["Accès étage 2"]
+  D2 --- A3["Accès étage 3"]
+  D2 --- S["Switchs serveurs"]
 ```
 
-> [!WARNING]
-> Règle d'or quand on teste un pare-feu **à distance** : prévoir un **rollback** (une crontab qui désactive le ruleset dans 5 minutes, ou une console locale). Se barrer la route SSH à soi-même est la faute de filtrage la plus fréquente de l'histoire des sysadmins.
+Chaque niveau est doublé pour supprimer les points uniques de panne.
 
-### 💻 Sur ton lab
+### Spine-leaf pour le datacenter
 
-```bash
-sudo nft list ruleset            # l'état actuel (souvent vide par défaut)
-sudo ufw status verbose 2>/dev/null  # si ufw est installé (frontal simple de nft)
+Dans le datacenter, la plupart du trafic circule entre serveurs (« est-ouest »). L'architecture **spine-leaf** relie chaque switch de feuille (leaf) à chaque switch d'épine (spine) : tout serveur est à deux sauts de n'importe quel autre, avec des chemins multiples utilisés simultanément (ECMP).
+
+```mermaid
+flowchart TB
+  SP1["Spine 1"] --- L1["Leaf 1"]
+  SP1 --- L2["Leaf 2"]
+  SP1 --- L3["Leaf 3"]
+  SP2["Spine 2"] --- L1
+  SP2 --- L2
+  SP2 --- L3
+  L1 --- H1["Serveurs rack 1"]
+  L2 --- H2["Serveurs rack 2"]
+  L3 --- H3["Serveurs rack 3"]
 ```
 
-### 🎯 Quiz — Sécurité
+### Principes de conception
 
-1. Pourquoi « défaut = refus » plutôt que « tout autoriser sauf la liste des interdits » ?
-2. Un serveur en DMZ est compromis. À quoi sert exactement le filtrage DMZ→interne ?
-3. Pourquoi le pare-feu local d'une VM reste-t-il utile alors qu'un pare-feu réseau existe déjà ?
+| Principe | Application |
+| --- | --- |
+| Redondance | Doubler liens, équipements et alimentations ; éviter tout point unique de panne |
+| Haute disponibilité de la passerelle | VRRP, HSRP ou GLBP : une adresse IP virtuelle partagée par deux routeurs |
+| Évolutivité | Plan d'adressage hiérarchique, résumé de routes |
+| Segmentation | VLAN, VRF, zones de pare-feu |
+| Simplicité | Standardiser les modèles de configuration, limiter les exceptions |
+| Gestion | Réseau d'administration séparé (out-of-band), sauvegarde des configs, automatisation |
+| Surabonnement (oversubscription) | Dimensionner les liens montants selon le trafic réel |
 
-<details>
-<summary>✅ Réponses</summary>
+La documentation fait partie de la conception : schéma logique et physique, plan d'adressage, tableau des VLAN, matrice de flux, inventaire.
 
-1. Parce qu'on ne peut **pas énumérer ce qu'il faut interdire** (la menace évolue) ; on sait en revanche exactement ce qui est légitime. L'inverse échoue silencieusement.
-2. À **limiter le rayon** : l'attaquant n'obtient que ce que la DMZ a le droit de toucher (souvent presque rien vers l'intérieur) — le rebond est bloqué ou au moins journalisé/ralentit.
-3. **Défense en profondeur** : le trafic interne (VM↔VM, lateral movement) ne traverse jamais le pare-feu réseau ; seul le pare-feu local protège contre un pair compromis sur le même LAN.
-</details>
+### Exemple de plan d'adressage d'une PME
 
----
+| Zone | VLAN | Réseau | Passerelle |
+| --- | --- | --- | --- |
+| Administration équipements | 10 | 10.10.10.0/24 | 10.10.10.1 |
+| Postes utilisateurs | 20 | 10.10.20.0/23 | 10.10.20.1 |
+| Serveurs | 30 | 10.10.30.0/24 | 10.10.30.1 |
+| Téléphonie IP | 40 | 10.10.40.0/24 | 10.10.40.1 |
+| Wi-Fi invités | 50 | 10.10.50.0/24 | 10.10.50.1 |
+| IoT, caméras | 60 | 10.10.60.0/24 | 10.10.60.1 |
+| DMZ | 70 | 10.10.70.0/28 | 10.10.70.1 |
 
-## 17. VPN : tunnels chiffrés
+## 16Cloud, virtualisation, SDN et SD-WAN
 
-### 17.1 À quoi ça sert vraiment
+### Réseau dans le cloud
 
-Un **VPN** crée un tunnel chiffré entre deux points à travers un réseau hostile, offrant : **confidentialité** (personne ne lit le contenu), **intégrité** (altération détectée), **authentification mutuelle** (seuls les légitimes entrent), et extension logique de réseau (le client distant « est » dans le LAN).
+Chez les grands fournisseurs (AWS, Azure, Google Cloud), le réseau est défini par logiciel. Les concepts se retrouvent d'un fournisseur à l'autre :
 
-Usages d'ingénieur : accès distant des admins (remplace les ouvertures de ports), liaison inter-sites (site A ↔ site B), accès à un lab depuis l'extérieur (ton cas d'usage futur : joindre 192.168.56.x depuis ailleurs), trafic de management protégé.
+| Concept | Rôle |
+| --- | --- |
+| VPC / VNet | Réseau virtuel privé avec sa plage CIDR (par exemple 10.0.0.0/16) |
+| Sous-réseau public / privé | Public : route vers l'Internet gateway. Privé : sortie par une passerelle NAT, pas d'accès entrant direct |
+| Table de routage | Détermine où va le trafic de chaque sous-réseau |
+| Security group | Pare-feu stateful attaché à une machine ou une interface |
+| Network ACL | Filtre stateless au niveau du sous-réseau |
+| Peering / Transit gateway | Interconnexion de VPC entre eux ou avec le réseau d'entreprise |
+| VPN / Direct Connect / ExpressRoute | Liaison sécurisée ou dédiée entre site et cloud |
+| Load balancer | Répartition L4 ou L7 entre instances |
+| Endpoints privés | Accès aux services du fournisseur sans passer par Internet |
 
-### 17.2 Les deux familles
+```mermaid
+flowchart TB
+  U["Utilisateurs"] --> LB["Load balancer public"]
+  subgraph VPC["VPC 10.0.0.0/16"]
+    subgraph PUB["Sous-réseau public 10.0.1.0/24"]
+      LB2["Load balancer"]
+      NATG["Passerelle NAT"]
+    end
+    subgraph PRIV["Sous-réseau privé 10.0.2.0/24"]
+      APP["Serveurs applicatifs"]
+    end
+    subgraph DATA["Sous-réseau données 10.0.3.0/24"]
+      DB["Base de données"]
+    end
+  end
+  LB --> LB2
+  LB2 --> APP
+  APP --> DB
+  APP --> NATG
+  NATG --> IGW["Internet gateway"]
+```
+
+Architecture type trois niveaux dans un VPC : seul le répartiteur est exposé.
+
+### Virtualisation et conteneurs
+
+- **Switch virtuel** (vSwitch, Open vSwitch) : relie les machines virtuelles d'un hôte au réseau physique.
+- **Conteneurs** (Docker, Kubernetes) : chaque pod reçoit une adresse IP ; le réseau est géré par un plugin **CNI** (Cilium, Calico). Les *Services* et *Ingress* exposent les applications, les *NetworkPolicies* filtrent les flux.
+- **Overlay** : **VXLAN** encapsule des trames de niveau 2 dans de l'UDP pour étendre des réseaux logiques sur une infrastructure routée (jusqu'à 16 millions de segments, contre 4 094 VLAN). **EVPN** est le plan de contrôle associé en datacenter.
+
+### SDN : réseau défini par logiciel
+
+Le **SDN** sépare le *plan de contrôle* (décide où envoyer) du *plan de données* (envoie réellement). Un contrôleur centralisé programme les équipements via des API (OpenFlow, NETCONF/YANG, gNMI, REST). Il rend le réseau automatisable et reproductible.
+
+#### Automatisation (NetDevOps)
+
+- Outils : Ansible, Terraform, Python (Netmiko, NAPALM, Nornir).
+- **Infrastructure as Code** : la configuration est un fichier versionné (Git), relu, testé puis déployé.
+- Télémétrie en continu (streaming) plutôt que simple scrutation SNMP.
+
+### SD-WAN et SASE
+
+Le **SD-WAN** pilote de façon centralisée les liaisons des sites distants et choisit dynamiquement le meilleur chemin (fibre, 4G/5G, Internet) pour chaque application selon la qualité mesurée. Il remplace souvent les liaisons MPLS coûteuses. Le **SASE** y associe la sécurité fournie depuis le cloud (pare-feu, passerelle web, ZTNA).
+
+### Autres notions modernes
+
+- **CDN et Edge computing** : rapprocher contenu et calcul de l'utilisateur.
+- **IoT** : milliers d'objets peu sécurisés, à isoler dans leur propre segment.
+- **Wi-Fi 7, 5G privée** : sans fil à haute performance pour sites industriels.
+- **Réseaux pour l'IA** : fabrics Ethernet 400/800G sans perte (RoCE) ou InfiniBand, pour relier des milliers d'accélérateurs de calcul.
+- **Cryptographie post-quantique** : migration progressive des échanges de clés (TLS, VPN) vers des algorithmes résistants aux futurs ordinateurs quantiques, déjà proposés dans certains navigateurs et services.
+
+## 17Supervision et dépannage
+
+### Méthode de dépannage
+
+1. **Définir** le problème : qui, quoi, depuis quand, qu'est-ce qui a changé ?
+2. **Délimiter** : un poste, un VLAN, un site, tout le monde ?
+3. **Hypothèses** puis **tests**, une variable à la fois.
+4. **Corriger**, vérifier, **documenter**.
+
+Trois approches : de bas en haut (couche 1 vers 7), de haut en bas, ou « diviser pour régner » en commençant par la couche 3 avec un ping.
+
+```mermaid
+flowchart TB
+  A["Pas d'accès à un site web"] --> B{"ping 127.0.0.1 répond ?"}
+  B -- Non --> B1["Pile réseau ou carte en cause"]
+  B -- Oui --> C{"ping de la passerelle ?"}
+  C -- Non --> C1["Câble, Wi-Fi, VLAN, IP, masque : couches 1 à 3 locales"]
+  C -- Oui --> D{"ping 8.8.8.8 ?"}
+  D -- Non --> D1["Routage, NAT, liaison opérateur, pare-feu"]
+  D -- Oui --> E{"ping par nom répond ?"}
+  E -- Non --> E1["DNS en cause : serveur DNS configuré ?"]
+  E -- Oui --> F{"Le port du service est ouvert ?"}
+  F -- Non --> F1["Pare-feu, service arrêté, mauvais port"]
+  F -- Oui --> G["Problème applicatif : certificat, URL, serveur web"]
+```
+
+### Commandes essentielles
+
+| Besoin | Windows | Linux / macOS |
+| --- | --- | --- |
+| Voir sa configuration IP | ipconfig /all | ip addr, ip route |
+| Tester la joignabilité | ping 8.8.8.8 | ping 8.8.8.8 |
+| Chemin vers une destination | tracert exemple.fr | traceroute / mtr exemple.fr |
+| Interroger le DNS | nslookup exemple.fr | dig exemple.fr |
+| Connexions et ports en écoute | netstat -ano | ss -tulpn |
+| Table ARP | arp -a | ip neigh |
+| Renouveler le bail DHCP | ipconfig /renew | dhclient ou nmcli |
+| Vider le cache DNS | ipconfig /flushdns | resolvectl flush-caches |
+| Tester un port TCP | Test-NetConnection hôte -Port 443 | nc -vz hôte 443 |
+| Requête HTTP | curl -I https://exemple.fr | curl -I https://exemple.fr |
+| Capture de paquets | Wireshark | tcpdump -i eth0 port 53, Wireshark |
+| Débit entre deux machines | iperf3 | iperf3 |
+| Scan de ports (sur ton propre réseau) | nmap | nmap -sV hôte |
+
+Légalité
+
+Ne scanne et ne capture que des réseaux qui t'appartiennent ou pour lesquels tu as une autorisation écrite.
+
+### Symptômes et causes probables
+
+| Symptôme | Causes probables |
+| --- | --- |
+| Adresse 169.254.x.x | Serveur DHCP injoignable, mauvais VLAN, câble |
+| Ping IP réussi, ping par nom échoué | DNS mal configuré ou en panne |
+| Accès à un réseau local mais pas à Internet | Passerelle absente ou fausse, NAT, route par défaut |
+| Deux machines avec la même IP | Conflit d'adresse : connexions intermittentes |
+| Lenteurs générales | Saturation d'un lien, boucle, duplex incohérent, Wi-Fi encombré |
+| Coupures périodiques sur le Wi-Fi | Interférences, roaming mal réglé, DHCP à bail court |
+| Erreur de certificat | Date de la machine fausse, certificat expiré, nom incorrect, interception TLS |
+| Paquets perdus en fin de chemin seulement | Souvent le routeur qui limite les réponses ICMP, pas une vraie perte |
+| Grosses pages bloquées, petites passent | Problème de MTU / MSS, ICMP filtré |
+
+### Supervision
+
+- **SNMP** (v3 de préférence) et **télémétrie** : état et compteurs des équipements.
+- **NetFlow / IPFIX / sFlow** : qui parle à qui, quel volume.
+- **Syslog** et **SIEM** : journaux centralisés.
+- Outils : Zabbix, Nagios, PRTG, Prometheus et Grafana, LibreNMS, ELK.
+- Indicateurs clés : disponibilité, utilisation des liens, erreurs et pertes d'interface, latence, charge CPU des équipements.
+- Surveille la **baseline** (valeurs normales) pour repérer les écarts.
+
+## 18Parcours, certifications et glossaire
+
+### Parcours d'apprentissage conseillé
 
 ```mermaid
 flowchart LR
-    subgraph S2S["Site-to-site (boîtier↔boîtier)"]
-        SA["LAN site A"] --- GA["🚪 Routeur VPN"] -.->|"tunnel IPsec permanent"| GB["🚪 Routeur VPN"] --- SB["LAN site B"]
-    end
-    subgraph RA["Remote access (poste→LAN)"]
-        P["💻 Poste nomade"] -.->|"tunnel à la demande"| C["🚪 Concentrateur VPN"] --- LI["LAN interne"]
-    end
+  A["1. Bases : OSI, IP, sous-réseaux"] --> B["2. Pratique : Packet Tracer, GNS3, labo Linux"]
+  B --> C["3. Services : DNS, DHCP, HTTP, VPN"]
+  C --> D["4. Sécurité : pare-feu, TLS, segmentation"]
+  D --> E["5. Avancé : OSPF, BGP, datacenter"]
+  E --> F["6. Cloud et automatisation : VPC, Ansible, Python"]
 ```
 
-Technologies à connaître :
-
-| Techno | Profil | Notes |
-|---|---|---|
-| **IPsec** | site-to-site historique, standard interopérable | IKEv2 pour l'établissement ; complexité de config |
-| **WireGuard** | moderne, minimal (4 000 lignes), rapide, cryptographie à jour | le choix par défaut aujourd'hui pour tout ce qui n'a pas de contrainte héritée ; intégré au noyau Linux |
-| OpenVPN | polyvalent, TLS-based | plus lourd, très répandu, historique |
-
-**WireGuard en 4 idées** : clés publiques/privées par pair (comme SSH), chaque pair déclare les **réseaux autorisés derrière lui** (`AllowedIPs` — qui servent à la fois d'ACL et de table de routage), pas de handshake permanent (silencieux quand inactif), interface `wg0` classique. Un tunnel lab = ~10 lignes de config.
-
-### 17.3 Le VPN dans ton lab (cas d'usage concret)
-
-Objectif type : joindre le host-only (192.168.56.0/24) depuis un autre poste ou depuis ton téléphone (test mobile de Traefik plus tard) :
-
-1. **bastion** héberge WireGuard (interface `wg0` en 10.10.0.1/24) ;
-2. ton poste : client WireGuard (10.10.0.2), `AllowedIPs = 192.168.56.0/24, 10.10.0.0/24` ;
-3. bastion : `ip_forward` activé + NAT/masquerade de 10.10.0.0/24 vers 192.168.56.0/24 ;
-4. le client « voit » le LAN complet sans AUCUN port exposé sur Internet (juste UDP/51820 vers bastion).
-
-> [!IMPORTANT]
-> Exposer un service = agrandir la surface. Exposer **un VPN** = un seul port UDP chiffré, authentifié par clés, pour rejoindre tout le reste. C'est le réflexe des équipes sysadmin : *« on n'ouvre pas SSH au monde, on ouvre le VPN »*.
-
-### 🎯 Quiz — VPN
-
-1. Un VPN chiffre-t-il « tout Internet » ? Quelle nuance importante ?
-2. Dans WireGuard, que font les `AllowedIPs` (deux rôles) ?
-3. Pourquoi préférer un VPN à un port forwarding SSH direct sur Internet pour l'admin du lab ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Il chiffre **le tronçon client↔concentrateur**, pas de bout en bout : après le concentrateur (serveur VPN commercial ou box), le trafic redevient classique (HTTPS reste chiffré lui-même). Le VPN protège le **transport**, pas les applications qui ne chiffrent pas.
-2. **Routage** (quels destins partent dans le tunnel) et **ACL** (quels sources le pair est autorisé à présenter) — un seul champ, deux effets.
-3. SSH exposé = un service d'attaque directe (brute force, CVE) sur une machine critique ; le VPN n'expose qu'un port UDP muet qui **ne répond même pas** aux pairs sans clés — et donne accès à tout le LAN, pas qu'à une machine.
-</details>
-
----
-
-## 18. Outils d'observation et de diagnostic
-
-### 18.1 La trousse à outils par couche
-
-| Couche | Outil | Question à laquelle il répond |
-|---|---|---|
-| 1-2 | `ip link`, `ethtool` | mon lien est-il UP ? vitesse, erreurs ? |
-| 2 | `ip neigh` (ARP) | mes voisins sont-ils visibles ? |
-| 3 | `ping`, `ip route get`, `traceroute` | l'IP répond ? par où passent mes paquets ? |
-| 4 | `ss`, `nmap`, `nc` | quels ports ouverts ? mes connexions ? |
-| 7 | `dig`, `curl -v` | la résolution ? la réponse applicative ? |
-| tout | `tcpdump`, Wireshark | QUE passe-t-il, octet par octet ? |
-
-### 18.2 tcpdump : voir les paquets réels
-
-```bash
-# Trafic SSH sur enp0s3, lisible
-sudo tcpdump -i enp0s3 -nn tcp port 22
-# 12:01:01.123456 IP 192.168.56.21.45122 > 192.168.56.11.22: Flags [P.], seq 1:45 ...
-
-# Les ARP uniquement (voir §5 en direct !)
-sudo tcpdump -i enp0s3 -nn arp
-# "Who has 192.168.56.11? Tell 192.168.56.21"
-
-# Écrire une capture pour l'analyser dans Wireshark
-sudo tcpdump -i enp0s3 -w /tmp/cap.pcap port 443
-```
-
-Lecture d'un flag TCP : `[S]` SYN, `[S.]` SYN-ACK, `[.]` ACK, `[P.]` données (PSH+ACK), `[F]` FIN, `[R]` RST. Une poignée de main ratée se voit immédiatement (SYN, SYN, SYN… = personne ne répond).
-
-### 18.3 nmap : cartographier proprement
-
-```bash
-nmap -sn 192.168.56.0/24        # qui est vivant sur le réseau (ping scan)
-nmap -sV 192.168.56.11          # quels ports + versions de services
-```
-
-> [!WARNING]
-> Scanner un réseau qui ne t'appartient pas (même « juste pour voir ») est illégal et repérable. Dans le lab : libre. Ailleurs : **écrit de la direction + fenêtre horaire**, toujours.
-
-### 18.4 La méthode avant l'outil
-
-L'outil ne vaut rien sans l'ordre des questions — c'est le §21. Mais un réflexe transversal : **comparer ce qui marche et ce qui ne marche pas** (gitlab joignable mais pas GitHub ? le problème est **derrière** le LAN ; dig OK mais curl KO ? le problème est **au-dessus** de la couche 3). Le réseau est un empilement : la comparaison localise l'étage en panne.
-
-### 💻 Sur ton lab — la séance complète
-
-```bash
-# Sur app1, dans l'ordre : un diagnostic complet de bout en bout
-ip -br link && ip -br addr          # couches 1-2-3 : mes interfaces
-ip neigh show                       # couche 2 : voisins ARP
-ip route && ip route get 8.8.8.8    # couche 3 : mes routes, ma décision
-ping -c2 192.168.56.11              # LAN joignable ?
-ping -c2 1.1.1.1                    # Internet joignable (sans DNS) ?
-dig +short debian.org               # couche 7 : DNS ?
-curl -sI https://debian.org | head -3   # HTTP répond ?
-```
-
-### 🎯 Quiz — Outils
-
-1. `ping 192.168.56.11` échoue mais `ip neigh` montre l'entrée gitlab en `FAILED` : couche fautive ?
-2. Dans tcpdump, je vois des SYN réémis sans SYN-ACK : diagnostic ?
-3. Pourquoi `ss -tlnp` est-il un réflexe de sécurité aussi bien que de debug ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Couche **2/3 locale** : ARP ne résout plus le voisin (machine éteinte, VLAN, IP changée) — on ne sort même pas du LAN.
-2. Le serveur ne répond pas aux SYN : **service down**, **filtrage DROP**, ou saturation (SYN flood).
-3. Elle montre **tous les services en écoute** (et leur propriétaire) : toute ligne inattendue est soit une brique oubliée, soit une intrusion — c'est l'inventaire de sa surface d'exposition.
-</details>
-
----
-
-## 19. Services avancés : VLAN, bonds, tunnels, QoS
-
-### 19.1 Les VLAN : découper un switch en plusieurs réseaux
-
-Un **VLAN** (IEEE 802.1Q) partitionne un (ou des) switch(s) physique(s) en réseaux logiques **isolés** : un ID de VLAN (1-4094) est ajouté dans la trame Ethernet (4 octets), et les trames du VLAN 10 ne joignent jamais celles du VLAN 20 sans routeur.
-
-```mermaid
-flowchart TB
-    SW["Switch configuré en VLANs"]
-    SW --> V10["VLAN 10 · SRV<br/>ports 1-8"]
-    SW --> V20["VLAN 20 · ADM<br/>ports 9-16"]
-    SW --> V30["VLAN 30 · APPS<br/>ports 17-24"]
-    V10 -->|"[broadcast du V10 ne sort PAS du V10]"| ISO["🔒 Isolation"]
-    V20 -.-> ISO
-    V30 -.-> ISO
-    SW --- TR["Port trunk (tagué 802.1Q)<br/>vers le routeur/firewall"] 
-    style TR fill:#8250df,color:#fff
-```
-
-- **Port access** (untagged) : un port = un VLAN pour un hôte ;
-- **Port trunk** (tagué) : transporte plusieurs VLAN (entre switchs, ou vers le firewall) ;
-- **Router-on-a-stick** : le routeur relie tous les VLANs par un seul trunk (sous-interfaces) — le modèle mental du lab VirtualBox évolué (§16.3) ;
-- **VLAN interne à Linux** : on peut créer des VLANs **logiciels** sur une seule carte (`ip link add link enp0s3 name enp0s3.10 type vlan id 10`) — parfait pour s'entraîner dans une VM.
-
-> [!IMPORTANT]
-> VLAN ≠ sécurité cryptographique : c'est une isolation logique (limitation des broadcasts + des joignabilités). La sécurité vient de ce qu'on **autorise à passer** entre VLANs (le firewall inter-VLAN) et du chiffrement.
-
-### 19.2 L'agrégation (bonding/LACP) et la redondance
-
-Un **bond** agrège plusieurs liens physiques en un lien logique : débit cumulé et/ou tolérance de panne. Modes usuels : `active-backup` (un actif, un secours — simple et robuste), LACP 802.3ad (négociation avec le switch, répartition). La règle d'or de la production : **aucun point de défaillance unique** — deux switchs, deux liens, deux alim, bonding partout.
-
-### 19.3 Tunnels : gre, vxlan et la couche overlay
-
-Un **tunnel** encapsule IP dans IP (GRE, IPsec, WireGuard) ou Ethernet dans UDP (VXLAN — le socle des réseaux SDN/Kubernetes). Le réflexe du lab : un tunnel GRE entre deux VMs pour connecter deux « sites » simulés, puis remplacer par WireGuard pour chiffrer — l'exercice parfait de compréhension overlay.
-
-### 19.4 QoS : gérer la congestion quand on ne peut pas l'acheter
-
-Quand la bande passante manque, la **QoS** priorise : classifier les flux (DSCP dans l'en-tête IP), mettre en file intelligemment (fq_codel, CAKE), réserver/garantir des débits (voix > admin > bulk). À l'échelle d'une entreprise c'est un chantier complet ; à l'échelle du lab, retenir le concept : **la latence des files** (bufferbloat) est souvent le vrai problème, pas le débit.
-
-### 🎯 Quiz — Services avancés
-
-1. Deux machines du même switch mais de VLANs différents se pinguent-elles ? Que faut-il entre elles ?
-2. `active-backup` vs LACP : quand choisir l'un ou l'autre ?
-3. Quel rapport entre VXLAN et Kubernetes ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. **Non** : leurs broadcasts (donc ARP) ne se voient pas. Il faut un **routeur inter-VLAN** (firewall) qui autorise le flux — et c'est précisément là qu'on applique la politique de sécurité.
-2. `active-backup` : partout, même switch simple, zéro config côté réseau. **LACP** : besoin de switch compatible, mais répartition de charge réelle et détection de défauts meilleure — le choix datacenter.
-3. VXLAN est l'**overlay réseau** de beaucoup de CNI Kubernetes : chaque pod vit dans un réseau virtuel encapsulé par-dessus le réseau physique — le concept §19.3 à l'échelle industrielle.
-</details>
-
----
-
----
-
-## 20. Supervision et bonnes pratiques d'ingénieur
-
-### 20.1 Observer en continu, pas seulement en panne
-
-La supervision réseau répond à deux questions : **est-ce que ça marche ?** (disponibilité) et **est-ce que ça va durer ?** (capacité, dérive). Le socle classique du lab : **Prometheus** (collecte) + **Grafana** (tableaux) — ta phase 2 exactement.
-
-| Métrique | Source | Seuil d'alerte typique |
-|---|---|---|
-| Disponibilité (ping/ICMP, TCP check) | blackbox exporter | > 1 échec consécutif |
-| Latence / gigue / pertes | ping, smokeping | pertes > 1 %, latence ×2 vs baseline |
-| Erreurs/drops d'interface | `ip -s link`, SNMP | compteurs qui montent |
-| Saturation (bande passante) | débit des interfaces | > 70-80 % soutenu |
-| Services (ports métier) | sonde TCP/HTTP | échec du check applicatif |
-
-> [!IMPORTANT]
-> Un CPU à 90 % n'alarme personne s'il redescend ; une **tendance** qui monte depuis 3 semaines, si. La valeur d'une supervision est dans l'**historique** (voir la dérive) et dans des alertes **actionnables** — chaque alerte doit répondre à « que faire maintenant ? ». Sinon on désactive l'alerte, et là, tout le monde sait comment ça finit.
-
-### 20.2 Documenter le réseau : le schéma vivant
-
-Le vrai outil n°1 du réseau, c'est la **documentation à jour** : plan d'adressage (qui a quelle IP, quelles réservations DHCP), topologie (qui est branché où, quels trunks), flux autorisés (matrice source→destination), mots de passe (coffre-fort, pas dans le wiki). Dans le lab : le README + les inventaires Ansible **sont** cette documentation — versionnée, donc datée et diffable (le lien avec le cours Git §21).
-
-### 20.3 Le changement : jamais à la main
-
-Modifier une config réseau en prod se fait : en **binôme/rélecture** (PR), avec un **plan de retour** écrit (rollback), en **fenêtre**, et si possible via l'automatisation (Ansible) qui rend le changement **reproductible et réversible**. La config « temporaire » faite en SSH à 23 h qui devient permanente par oubli est un classique de l'incident de production.
-
-### 20.4 Check-list de bonnes pratiques (résumé d'ingénieur)
-
-- Plan d'adressage **écrit avant** la première machine (même au lab) ;
-- IP fixes **réservées** (DHCP) ou statiques documentées — jamais « au hasard qui marche » ;
-- Un hôte = un rôle = un nom DNS cohérent (`gitlab`, pas `vm-ubuntu-3`) ;
-- SSH : par clés, jamais par mot de passe, accès limité à la source admin ;
-- Pare-feu local sur chaque machine + politique réseau « défaut refus » entre zones ;
-- Supervision **avant** d'en avoir besoin (la panne n'est pas le moment de découvrir qu'on n'a pas de métriques) ;
-- Sauvegardes **testées** (une restauration jamais rejouée n'est pas une sauvegarde) ;
-- Toute modif réseau passe par Git (IaC) — jamais à la main (règle n°1 du lab).
-
----
-
-## 21. Méthode de dépannage : la cascade
-
-### 21.1 Le principe : monter ou descendre les couches méthodiquement
-
-Le réseau est un empilement (§2) : **toute panne se localise en testant couche par couche**, dans un ordre fixe. On ne « bricole pas des trucs au hasard » — on bissecte.
-
-```mermaid
-flowchart TB
-    P["❌ 'Ça ne marche pas'<br/>(ex : curl vers un serveur échoue)"] --> L7{"curl -v : où bloqué ?"}
-    L7 -->|"résolution KO"| DNS["resolver : dig +short<br/>bon serveur DNS ? /etc/resolv.conf ?"]
-    L7 -->|"connect KO"| L4{"port ouvert ?<br/>nc -zv IP 443"}
-    L4 -->|KO| L3{"ping IP"}
-    L3 -->|KO| L2L3{"route correcte ?<br/>ip route get IP"}
-    L2L3 -->|KO| CONF["Vérifier sa config :<br/>ip addr, masque, gateway"]
-    L3 -->|"ping KO partout"| L2{"LAN vivant ?<br/>ping passerelle, ip neigh"}
-    L2 -->|"voisins invisibles"| L1["lien/câble/VLAN : ip link, ethtool"]
-    DNS --> FIX["✅ Réparer l'étage fautif, RIEN d'autre"]
-    FIX --> RE["Re-tester de bout en bout"]
-```
-
-### 21.2 Les commandes-par-étage (résumé de la méthode)
-
-| Étage | Test | Réponse attendue |
-|---|---|---|
-| 1-2 | `ip -br link` | interfaces UP, pas de compteur d'erreurs qui explose |
-| 2 | `ip neigh show` | la passerelle en REACHABLE |
-| 3 (local) | `ip addr`, `ip route` | bonne IP, bon masque, une route default |
-| 3 (LAN) | `ping passerelle` | réponses < 1-2 ms |
-| 3 (lointain) | `ping 1.1.1.1` | Internet atteignable sans DNS |
-| chemin | `traceroute -n cible` | où le chemin s'arrête |
-| 4 | `nc -zv IP port` | port ouvert (`succeeded!`) |
-| 7 | `dig +short nom` | résolution correcte |
-| 7+ | `curl -v URL` | code HTTP attendu ; sinon on lit la main TLS |
-
-> [!IMPORTANT]
-> **La règle de l'ingénieur** : à chaque étage, se demander *« qu'est-ce qui devrait être vrai ici ? »* et **vérifier cette chose précise**. « Testons plein de trucs » est la méthode qui transforme 15 minutes de panne en 4 heures.
-
-### 21.3 Scénarios types (et leur lecture rapide)
-
-**« Internet ne marche pas » (mais le LAN oui)** :
-1. `ping 1.1.1.1` OK → le réseau va, c'est le **DNS** → `dig +short` → réparer resolv.conf/resolver.
-2. `ping 1.1.1.1` KO mais `ping passerelle` OK → **NAT/FAI/routeur** → traceroute, voir où ça meurt.
-3. `ping passerelle` KO mais `ip neigh` rempli → couche 2 (VLAN changé ? switch ? câble ?).
-
-**« Lent mais ça marche »** : pertes (`ping -i 0.2 -c 50` → % de pertes), bufferbloat (latence sous charge), erreurs d'interface (`ip -s link`, compteurs CRC), duplex désaccordé. Le débit se mesure (`iperf3`), la latence **sous charge** se mesure aussi — c'est souvent elle, pas la bande passante.
-
-**« Ça marchait hier »** : qu'est-ce qui a changé ? (`ip addr` modifié ? bail DHCP renouvelé vers une autre plage ? route ajoutée ? update ?) — le réflexe « dernier changement » résout la moitié des incidents. Dans le lab, c'est exactement `git log` sur les playbooks (§20.3) — et le reflog réseau existe aussi : les configs sont versionnées.
-
-**Une machine affiche 169.254.x.x** : DHCP raté (§6.5) — serveur down ? scope plein ? rogue DHCP ? câble dans le mauvais VLAN ?
-
-### 💻 Sur ton lab — l'exercice roi
-
-Cassez délibérément (sur une VM jetable), puis répare avec la cascade :
-1. retire la route default → constate l'erreur exacte (`connect: Network is unreachable`) ;
-2. pose une mauvaise entrée DNS (`nameserver 192.0.2.99`) → dig timeout mais ping OK ;
-3. vide le cache ARP et désactive l'interface un instant → observe les étages qui tombent un à un.
-
-Chaque casse → identifie l'étage **avant** de réparer. C'est l'entraînement le plus proche de la vraie vie.
-
-### 🎯 Quiz — Dépannage
-
-1. `curl` KO, `ping` la même IP OK, `dig` OK : à quel étage chercher ?
-2. Pourquoi tester `ping 1.1.1.1` plutôt que `ping google.com` en premier ?
-3. La moitié des incidents « mystère » sont résolus par quelle première question ?
-
-<details>
-<summary>✅ Réponses</summary>
-
-1. Le transport/application : la couche 3 passe (ping OK), le nom se résout (dig OK) → port fermé, service down, filtrage L4, ou problème HTTP/TLS → `nc -zv` puis `curl -v`.
-2. Une **IP**, pas un nom : elle teste la couche 3 pure sans mélanger le DNS — une seule variable à la fois.
-3. **« Qu'est-ce qui a changé ? »** — config, update, câblage, DNS, certificat expiré…
-</details>
-
----
-
-## 22. Aide-mémoire (cheat sheet)
-
-### Lire sa machine
-
-```bash
-ip -br link              # interfaces et état (couche 1-2)
-ip -br addr              # interfaces et adresses (couche 3)
-ip route                 # table de routage
-ip route get CIBLE       # quelle route prendrait CE dest ?
-ip neigh show            # cache ARP (voisins)
-ss -tlnp                 # ports en écoute
-ss -tan                  # connexions en cours
-```
-
-### Tester
-
-```bash
-ping -c3 CIBLE           # joignabilité L3
-traceroute -n CIBLE      # chemin (sans résolution DNS, plus rapide)
-nc -zv IP PORT           # port TCP ouvert ?
-dig +short NOM           # résolution DNS
-dig @192.168.1.1 NOM     # interroger UN serveur précis
-curl -v URL              # HTTP/TLS verbeux (où ça coince ?)
-iperf3 -s / iperf3 -c HÔTE   # mesurer un débit réel
-```
-
-### Capturer
-
-```bash
-sudo tcpdump -i eth0 -nn arp                 # voir ARP en direct
-sudo tcpdump -i eth0 -nn tcp port 443        # un flux précis
-sudo tcpdump -i eth0 -w cap.pcap             # capturer pour Wireshark
-```
-
-### Configurer (temporaire — pour apprendre ; persistant = netplan/nmcli)
-
-```bash
-sudo ip addr add 192.168.56.99/24 dev enp0s3   # ajouter une IP
-sudo ip link set enp0s3 up                      # monter une interface
-sudo ip route add 10.20.0.0/16 via 192.168.56.1 # route statique
-sudo ip neigh flush all                         # vider le cache ARP
-```
-
-### Les blocs à connaître par cœur
-
-| Bloc / valeur | Rôle |
-|---|---|
-| 10/8, 172.16/12, 192.168/16 | privé RFC 1918 |
-| 127.0.0.1 / ::1 | loopback |
-| 169.254/16 | APIPA = DHCP en échec |
-| 255.255.255.255 / ff02::1 | broadcast / multicast de lien |
-| Ports : 22, 53, 80, 443 | SSH, DNS, HTTP, HTTPS |
-
-### Subnetting en 10 secondes
-
-```
-/26 → pas de 64 → frontières 0, 64, 128, 192 (14… non : 62 hôtes)
-/28 → pas de 16 → frontières 0, 16, 32… (14 hôtes)
-Où tombe X ? → plus grand multiple du pas ≤ X = le réseau ; réseau + pas − 1 = broadcast
-```
-
----
-
-## 23. Exercices et scénarios corrigés
-
-> 🛠️ Scripts de mise en place dans [`exercices/`](../exercices/) — ils créent les conditions du scénario sur une VM jetable.
-
-### Exercice 1 — Reconnaissance de sa propre machine ⭐
-
-Sans rien casser : sur app1, détermine (et justifie pour chaque réponse) : tes IP et leurs réseaux, ta MAC et son fabricant, ta passerelle, ta route vers gitlab vs Internet, tes voisins ARP, tes ports en écoute.
-
-<details>
-<summary>✅ Correction — la séquence complète</summary>
-
-```bash
-ip -br link                  # MACs (OUI 08:00:27 = VirtualBox)
-ip -br addr                  # 192.168.56.21/24 (host-only) + 10.0.2.15/24 (NAT)
-ip route                     # default via 10.0.2.2 (NAT) ; 192.168.56.0/24 connecté
-ip route get 192.168.56.11   # → dev enp0s3 (direct, local)
-ip route get 8.8.8.8         # → via 10.0.2.2 (NAT)
-ip neigh show                # voisins vus récemment
-ss -tlnp                     # services locaux en écoute
-```
-Chaque ligne répond à une question du §1.3 : c'est la **photo** de toutes les couches 1→4.
-</details>
-
-### Exercice 2 — Le subnetting à la main 🎯
-
-On découpe 192.168.56.0/24 en 4 sous-réseaux égaux. Donne pour chacun : CIDR, plage d'hôtes, broadcast. Puis : dans quel sous-réseau tombe 192.168.56.173 ?
-
-<details>
-<summary>✅ Correction</summary>
-
-4 sous-réseaux → 2 bits empruntés → **/26** (pas de 64) :
-
-| Sous-réseau | Hôtes | Broadcast |
-|---|---|---|
-| 192.168.56.0/26 | .1–.62 | .63 |
-| 192.168.56.64/26 | .65–.126 | .127 |
-| 192.168.56.128/26 | .129–.190 | .191 |
-| 192.168.56.192/26 | .193–.254 | .255 |
-
-.173 : plus grand multiple de 64 ≤ 173 = **128** → sous-réseau 192.168.56.128/26, broadcast .191.
-</details>
-
-### Exercice 3 — Diagnostic en cascade 🚨
-
-Sur une VM : `curl` vers debian.org échoue. `ping 192.168.56.11` marche ; `ping 1.1.1.1` marche ; `dig +short debian.org` timeout. Où est la panne ? Répare.
-
-<details>
-<summary>✅ Correction</summary>
-
-Couche 3 saine (ping IP internes **et** publiques OK) → la panne est au-dessus : le **DNS** (dig timeout confirme). Fix :
-
-```bash
-cat /etc/resolv.conf                      # nameserver cassé ou vide ?
-echo "nameserver 1.1.1.1" | sudo tee /etc/resolv.conf
-dig +short debian.org && curl -sI https://debian.org | head -1   # ✅
-```
-La cascade a évité de chercher du côté câble/routage/pare-feu : deux tests ont suffi à localiser l'étage.
-</details>
-
-### Exercice 4 — Voir ARP et TCP de tes propres yeux 👀
-
-Deux terminaux sur deux VMs. Terminal A : capture ARP. Terminal B : vide le cache et pingue gitlab. Note la requête broadcast et la réponse unicast. Puis capture le handshake TCP vers gitlab:22 (ssh) et identifie SYN / SYN-ACK / ACK.
-
-<details>
-<summary>✅ Correction</summary>
-
-```bash
-# Terminal A (app1) :
-sudo tcpdump -i enp0s3 -nn arp
-# → 12:00:00 ARP, Request who-has 192.168.56.11 tell 192.168.56.21
-# → 12:00:00 ARP, Reply 192.168.56.11 is-at 08:00:27:11:bb:02
-
-# Terminal A (même interface, autre fenêtre) :
-sudo tcpdump -i enp0s3 -nn tcp port 22
-# Terminal B :
-sudo ip neigh flush all
-ping -c1 192.168.56.11      # fait naître l'échange ARP
-ssh 192.168.56.11            # fait naître : Flags [S] → [S.] → [.]  (§9.3)
-```
-Le broadcast `who-has` part à FF:FF:FF:FF:FF:FF ; la reply est unicast. Tu viens de voir les §4-5 en vrai.
-</details>
-
-### Exercice 5 — Mini-projet : isoler une DMZ dans le lab 🏗️
-
-Objectif : donner à app2 un **troisième réseau** « DMZ » (192.168.57.0/24), faire du bastion le routeur inter-zones avec filtrage : bastion peut SSH vers la DMZ, la DMZ ne peut RIEN initier vers le host-only. Documente le plan d'adressage dans le repo du lab (commit signé !).
-
-<details>
-<summary>✅ Correction — les grandes étapes</summary>
-
-1. VirtualBox : ajouter à app2 et bastion une carte sur un nouveau réseau host-only 192.168.57.0/24 ;
-2. bastion : `sudo ip addr add 192.168.57.1/24 dev enp0s9` + `net.ipv4.ip_forward=1` ;
-3. app2 : IP 192.168.57.22/24, **pas de gateway** (il ne doit rien initier dehors) ;
-4. filtrage sur bastion (nftables, §16.5) : politique par défaut drop sur le forwarding ; autoriser `ct state established,related` (les retours) + `ip saddr 192.168.56.10 ip daddr 192.168.57.22 tcp dport 22 accept` — la DMZ répond mais n'initie pas ;
-5. test : depuis bastion `ssh 192.168.57.22` OK ; depuis app2 `ping 192.168.56.21` doit échouer ;
-6. documentation : plan d'adressage + règles nft dans `labo-devops/ansible/`, commit `docs: ajout DMZ 192.168.57.0/24 (exercice réseaux)`.
-
-C'est le schéma §16.3 monté de tes mains : zones, filtrage inter-zones, défaut-refus.
-</details>
-
----
-
-## 24. Glossaire
-
-| Terme | Définition |
-|---|---|
-| **ACL** | Liste de contrôle d'accès : règles d'autorisation/interdiction (paquets, routes…) |
-| **ARP** | Résolution IP→MAC sur un réseau local (§5) |
-| **Bail (lease)** | Attribution DHCP temporaire d'une IP (§11) |
-| **Bond** | Agrégation de liens physiques en un lien logique (§19.2) |
-| **Broadcast** | Envoi à tous les hôtes d'un segment (MAC FF:FF:FF:FF:FF:FF) |
-| **CIDR** | Notation préfixe/masque (ex. /24) et système d'allocation des IP |
-| **DMZ** | Zone isolée pour les services exposés (§16.3) |
-| **DNS** | Résolution noms↔IP, hiérarchique et mise en cache (§10) |
-| **Domaine de broadcast** | Périmètre où les broadcasts circulent = un réseau IP |
-| **Domaine de collision** | Périmètre où deux émissions se perturbent (mort avec les switchs) |
-| **DHCP** | Distribution automatique de la configuration IP (§11) |
-| **Firewall à état** | Pare-feu qui suit les connexions, pas seulement les paquets (§16.2) |
-| **Gateway (passerelle)** | IP du routeur de sortie de mon réseau (§7.3) |
-| **Header (en-tête)** | Métadonnées ajoutées à chaque couche (encapsulation, §2.2) |
-| **Host-only** | Réseau virtuel isolé, hôte + VMs seulement (le réseau du lab) |
-| **HTTP / HTTPS / TLS** | Protocole web / sa version chiffrée / le protocole de chiffrement (§13) |
-| **ICMP** | Messages de contrôle et d'erreur d'IP (ping, traceroute) (§8.3) |
-| **IPsec / WireGuard / OpenVPN** | Technologies VPN (§17.2) |
-| **Latence / gigue / pertes** | Temps de traversée / sa variation / paquets perdus — le trio santé réseau (§3.4, §20.1) |
-| **MAC** | Adresse physique d'une interface, locale au segment (§4.1) |
-| **MTU** | Taille maximale des données d'une trame (1500 octets standard) |
-| **NAT / PAT** | Traduction d'adresses / de ports — sortir à plusieurs sous une IP publique (§12) |
-| **nftables** | Pare-feu Linux moderne (successeur d'iptables) (§16.5) |
-| **OSI / TCP/IP** | Modèles en couches de référence (§2) |
-| **Port** | Numéro identifiant un service sur une machine (16 bits) (§9.2) |
-| **Promiscuité** | Mode d'une carte qui accepte toutes les trames (captures) (§4.4) |
-| **Résolveur récursif / autoritaire** | Deux rôles DNS : cherche pour vous / détient la réponse (§10) |
-| **RFC 1918** | Les blocs d'adresses privées (10/8, 172.16/12, 192.168/16) |
-| **Segment / trame / paquet / segment TCP** | Unités des couches 2 / 2 / 3 / 4 — attention aux deux « segments » (contexte !) |
-| **SLAAC** | Auto-configuration d'adresses IPv6 sans serveur (§15.2) |
-| **Subnetting** | Découpe d'un réseau en sous-réseaux (§6.4) |
-| **Switch / routeur** | Équipement de couche 2 (par MAC) / de couche 3 (par IP) (§4, §8) |
-| **TTL** | Compteur anti-boucle décrémenté par routeur (§8.1) ; en DNS : durée de cache (§10.4) |
-| **VLAN** | Réseaux logiques isolés sur un même switch (§19.1) |
-| **VPN** | Tunnel chiffré entre deux réseaux/points (§17) |
-| **VXLAN** | Encapsulation Ethernet-over-UDP, socle des overlays SDN/K8s (§19.3) |
-| **Wireshark / tcpdump** | Analyseurs de paquets graphique / en ligne de commande (§18.2) |
-
----
-
-> 📚 **Pour aller plus loin** :
-> - [OpenClassrooms — Apprenez le fonctionnement des réseaux TCP/IP](https://openclassrooms.com/fr/courses/8574471-apprenez-le-fonctionnement-des-reseaux-tcp-ip) — la base en français ;
-> - [Les bases de l'adressage IP (IT-Connect)](https://www.it-connect.fr/cours/les-bases-de-ladressage-ip/) — subnetting bien vulgarisé ;
-> - [Practical Networking (youtube)](https://www.youtube.com/@PracticalNetworking) — les meilleurs schémas animés sur ARP/TCP/NAT ;
-> - [High Performance Browser Networking](https://hpbn.co/) — gratuit, la référence côté application/transport ;
-> - [Wireshark Sample Captures](https://wiki.wireshark.org/SampleCaptures) — apprendre à lire de vraies traces.
-
-*Fin du cours — le meilleur exercice reste ton lab : chaque phase du plan DevOps (GitLab, Traefik, monitoring) mettra en jeu ces concepts. Le réseau ne s'apprend pas, il s'observe.* 📡
+- **Pratique** : Cisco Packet Tracer (gratuit), GNS3, EVE-NG, Containerlab, machines virtuelles Linux, un vieux switch d'occasion.
+- **Wireshark** : capture ton propre trafic (ping, DNS, handshake TCP, TLS) et relis les chapitres 8 à 10 avec les vraies trames.
+- **RFC** : les textes officiels de l'IETF (793 TCP, 791 IP, 1918 adresses privées, 9000 QUIC, 8446 TLS 1.3).
+
+| Certification | Niveau | Contenu |
+| --- | --- | --- |
+| CompTIA Network+ | Débutant, neutre vis-à-vis des éditeurs | Fondamentaux, services, sécurité, dépannage |
+| Cisco CCNA | Débutant à intermédiaire | Commutation, routage, IP, Wi-Fi, automatisation, sécurité de base |
+| Juniper JNCIA | Débutant | Fondamentaux sur l'écosystème Juniper |
+| CompTIA Security+ | Intermédiaire | Sécurité générale |
+| Cisco CCNP, CCIE | Avancé, expert | Entreprise, datacenter, sécurité, opérateur |
+| AWS / Azure / Google (réseau) | Intermédiaire à avancé | Réseau cloud et hybride |
+| Fortinet NSE, Palo Alto PCNSA | Variable | Pare-feu et sécurité réseau |
+
+### Glossaire express
+
+| Terme | Définition courte |
+| --- | --- |
+| ACL | Liste de règles autorisant ou refusant du trafic |
+| AS | Système autonome : ensemble de réseaux sous une même politique de routage |
+| Bail (lease) | Durée pendant laquelle une adresse DHCP est attribuée |
+| Broadcast | Message envoyé à tous les appareils d'un segment |
+| CIDR | Notation et allocation d'adresses avec préfixe de longueur variable |
+| Domaine de broadcast | Ensemble des appareils qui reçoivent un même broadcast (un VLAN) |
+| Gateway (passerelle) | Routeur qui sert de sortie d'un réseau local |
+| Hôte | Machine connectée à un réseau |
+| Latence | Temps de transit d'un paquet |
+| MAC | Adresse physique de 48 bits d'une interface |
+| MTU | Taille maximale d'un paquet sur un lien (1 500 octets en Ethernet) |
+| Next hop | Prochain routeur sur le chemin |
+| Passerelle par défaut | Destination des paquets vers d'autres réseaux |
+| Port | Numéro identifiant un service ou une application sur une machine |
+| QoS | Priorisation de certains flux (voix, vidéo) |
+| Socket | Couple adresse IP et port : extrémité d'une connexion |
+| Trunk | Lien transportant plusieurs VLAN |
+| TTL | Compteur de sauts limitant la vie d'un paquet |
+| VRF | Table de routage virtuelle : plusieurs réseaux isolés sur un même routeur |
+| VRRP / HSRP | Protocoles de passerelle redondante à IP virtuelle |
+
+### Fiche express : les dix réflexes
+
+1. Un switch lit les **MAC**, un routeur lit les **IP**.
+2. Un VLAN est un réseau IP distinct : il faut un routeur pour passer de l'un à l'autre.
+3. Hôtes utilisables = 2n − 2 ; taille de bloc = 256 − octet du masque.
+4. Le routeur choisit la route au **préfixe le plus long**.
+5. TCP = fiable et ordonné ; UDP = rapide et sans garantie ; QUIC = UDP fiable et chiffré.
+6. Quand quelque chose ne marche pas : câble, IP, passerelle, DNS, port, application.
+7. Le NAT n'est pas un pare-feu.
+8. Tout ce qui sort ou entre doit être chiffré (TLS, SSH, VPN).
+9. Segmente, refuse par défaut, journalise.
+10. Documente ce que tu construis.
+
+Cours rédigé en octobre 2026. Les débits, versions de normes et parts de déploiement évoluent : pour un chiffre précis (adoption d'IPv6, nouvelles normes Wi-Fi ou Ethernet), vérifie la source officielle (IEEE, IETF, registres RIR) avant de t'y appuyer.
