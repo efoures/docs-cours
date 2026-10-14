@@ -26,7 +26,7 @@ Sommaire
 18. [17 Supervision, dépannage](#c17)
 19. [18 Parcours et glossaire](#c18)
 
-## 00Vue d'ensemble
+## 00 Vue d'ensemble
 
 Un réseau est un ensemble d'appareils reliés pour échanger des données selon des règles communes appelées **protocoles**. Tout le cours répond à une seule question : comment un message part d'une application sur une machine, traverse des câbles, des commutateurs et des routeurs, et arrive à la bonne application sur une autre machine.
 
@@ -78,7 +78,7 @@ Carte du cours : les six grands blocs et leurs notions.
 - Diagnostiquer une panne avec une méthode, couche par couche.
 - Sécuriser un réseau et comprendre les architectures actuelles, cloud compris.
 
-## 01Fondamentaux
+## 01 Fondamentaux
 
 ### Les types de réseaux par taille
 
@@ -193,7 +193,7 @@ Encapsulation à l'émission, de l'application vers le câble.
 - Les adresses MAC changent à chaque saut. Les adresses IP source et destination restent les mêmes de bout en bout (hors NAT).
 - Le dépannage suit l'ordre : couche 1, puis 2, puis 3, puis les couches hautes.
 
-## 03Couche physique
+## 03 Couche physique
 
 La couche 1 transporte des bits sous forme de signaux électriques (cuivre), lumineux (fibre) ou radio (Wi-Fi). Elle fixe la distance, le débit et la sensibilité aux interférences.
 
@@ -396,7 +396,7 @@ Méthode pour toute question d'adressage
 
 Le plan d'adressage doit aussi prévoir la croissance : garde de la marge et regroupe les blocs par site ou par fonction pour pouvoir résumer les routes.
 
-## 06IPv6
+## 06 IPv6
 
 IPv4 offre environ 4,3 milliards d'adresses, épuisées depuis les années 2010 à l'échelle des registres. **IPv6** utilise 128 bits, soit 3,4 × 1038 adresses. Son déploiement progresse régulièrement : une part importante du trafic des grands services mondiaux l'utilise désormais, avec de fortes différences selon les pays et les opérateurs.
 
@@ -441,7 +441,7 @@ Un réseau local reçoit presque toujours un préfixe **/64** : 64 bits de rése
 
 Pendant la transition, on utilise la **double pile** (IPv4 et IPv6 en parallèle), des tunnels, et des mécanismes comme **NAT64 / DNS64** pour atteindre des services IPv4 depuis un réseau IPv6 seul. L'absence de NAT ne supprime pas le besoin d'un pare-feu : c'est lui qui protège, pas la traduction d'adresse.
 
-## 07Routage, ICMP et NAT
+## 07 Routage, ICMP et NAT
 
 Le **routeur** relie des réseaux différents. Pour chaque paquet, il regarde l'adresse IP de destination, cherche la **route la plus spécifique** (préfixe le plus long) dans sa table de routage et transmet au prochain saut (next hop).
 
@@ -510,7 +510,7 @@ Le **NAT** traduit des adresses privées en adresses publiques à la sortie d'un
 - Les opérateurs utilisent le **CGNAT** : plusieurs abonnés partagent une même IPv4 publique. Cela complique l'hébergement chez soi et motive IPv6.
 - Le NAT n'est pas un mécanisme de sécurité, seulement un effet de bord.
 
-## 08Transport : TCP, UDP, QUIC
+## 08 Transport : TCP, UDP, QUIC
 
 La couche 4 relie des **programmes** et non des machines. Elle utilise les **ports** (0 à 65 535) : une connexion est identifiée par IP source, port source, IP destination, port destination et protocole.
 
@@ -572,7 +572,7 @@ Poignée de main en trois temps (three-way handshake), puis fermeture en quatre 
 
 **QUIC** (RFC 9000) fonctionne au-dessus d'UDP et intègre le chiffrement TLS 1.3. Il établit une connexion en un aller-retour (voire zéro en reprise), évite le blocage de tête de file entre flux et survit à un changement de réseau (Wi-Fi vers 4G). C'est le transport de **HTTP/3**, déjà très répandu sur les grands sites.
 
-## 09DNS et DHCP
+## 09 DNS et DHCP
 
 ### DNS : l'annuaire d'Internet
 
@@ -719,7 +719,7 @@ Négociation TLS 1.3 : un seul aller-retour avant d'envoyer les données.
 - **CDN** : serveurs de cache répartis dans le monde, rapprochés des utilisateurs (anycast).
 - **Load balancer L4** (répartit selon IP et port) ou **L7** (selon l'URL, les en-têtes, les cookies).
 
-## 11Autres services et ports
+## 11 Autres services et ports
 
 | Service | Port | Transport | Rôle et remarque |
 | --- | --- | --- | --- |
